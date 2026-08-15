@@ -1,15 +1,5 @@
 from __future__ import annotations
 
-import pytest
-from fastapi.testclient import TestClient
-
-from impacto.api.app import create_app
-
-
-@pytest.fixture(scope="module")
-def client():
-    return TestClient(create_app())
-
 
 def test_health(client):
     r = client.get("/health")
