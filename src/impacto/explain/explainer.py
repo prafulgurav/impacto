@@ -19,32 +19,12 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from ..config import get_settings
 from ..eventstudy.analogs import AnalogEngine
 from ..impact.engine import ImpactEngine
 from ..knowledge import KnowledgeBase
+from ..llm import SYSTEM_PROMPT, LLMError, LLMProvider, get_llm
 from ..models import Citation, DetectedEvent, Explanation
 from .guardrails import DISCLAIMER, check_output
-
-SYSTEM_PROMPT = """You are the narration layer of Impacto, a market-\
-intelligence system for Indian equities.
-
-You will receive a set of RETRIEVED FACTS: detected global events, transmission-\
-channel definitions, and realised historical event-study statistics. Rewrite them \
-into a clear, direct explanation for an informed retail investor in India.
-
-Hard rules:
-1. Use ONLY the numbers in the retrieved facts. Never compute, estimate or invent
-   a figure. If a number is not given, do not state one.
-2. Never predict a future price or direction for any security or index. Never
-   suggest buying, selling or holding anything.
-3. Always describe statistics as historical and always state the sample size.
-4. When the retrieved facts mark a linkage as two-sided or low confidence, say so
-   plainly. Do not resolve an ambiguity the data does not resolve.
-5. Prefer the mechanism over the correlation: explain WHY the channel transmits.
-6. If the retrieved facts do not answer the question, say that directly.
-
-Write in plain prose. No hype, no hedging filler, no emoji."""
 
 
 class Explainer:
@@ -54,11 +34,20 @@ class Explainer:
         impact: ImpactEngine,
         analogs: AnalogEngine,
         event_history: list[DetectedEvent] | None = None,
+        llm: LLMProvider | None = None,
     ) -> None:
         self.kb = kb
         self.impact = impact
         self.analogs = analogs
         self.history = event_history or analogs.history
+        self._llm = llm
+
+    @property
+    def llm(self) -> LLMProvider:
+        # Resolved lazily so a test can construct an Explainer without touching env.
+        if self._llm is None:
+            self._llm = get_llm()
+        return self._llm
 
     # ------------------------------------------------------------- retrieve
     def _events_near(self, as_of: date, lookback_days: int = 5) -> list[DetectedEvent]:
@@ -201,47 +190,54 @@ class Explainer:
         return "\n\n".join(paras), citations
 
     # -------------------------------------------------------------- narrate
-    def _narrate(self, question: str, facts: str) -> str | None:  # pragma: no cover
-        s = get_settings()
-        if s.llm_provider == "none" or not s.anthropic_api_key:
-            return None
-        try:
-            import anthropic
+    @staticmethod
+    def _user_prompt(question: str, facts: str) -> str:
+        return f"QUESTION:\n{question}\n\nRETRIEVED FACTS:\n{facts}"
 
-            client = anthropic.Anthropic(api_key=s.anthropic_api_key)
-            msg = client.messages.create(
-                model=s.llm_model,
-                max_tokens=900,
-                system=SYSTEM_PROMPT,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": f"QUESTION:\n{question}\n\nRETRIEVED FACTS:\n{facts}",
-                    }
-                ],
-            )
-            return "".join(b.text for b in msg.content if b.type == "text")
-        except Exception:
+    def _narrate(self, question: str, facts: str) -> str | None:
+        """Ask the configured provider to rewrite the composed answer.
+
+        Returns None on any failure. The caller already holds a complete, compliant
+        answer, so a provider outage is a style regression and nothing more.
+        """
+        try:
+            text = self.llm.complete(SYSTEM_PROMPT, self._user_prompt(question, facts))
+        except LLMError:
             return None
+        except Exception:
+            # A provider SDK can raise anything. Narration is never worth an outage.
+            return None
+        return text.strip() or None
+
+    def compose(
+        self, question: str, as_of: date | None = None, target: str | None = None
+    ) -> tuple[str, list[Citation]]:
+        """The deterministic, fully-cited answer. Public because SSE emits it first."""
+        return self._compose(question, as_of or date.today(), target)
+
+    def narrate_stream(self, question: str, facts: str):
+        """Yield narration tokens. Raises LLMError so the SSE layer can fall back."""
+        yield from self.llm.stream(SYSTEM_PROMPT, self._user_prompt(question, facts))
 
     # ------------------------------------------------------------------ api
-    def explain(
-        self, question: str, as_of: date | None = None, target: str | None = None
+    def finalise(
+        self,
+        question: str,
+        facts: str,
+        citations: list[Citation],
+        narrated: str | None,
     ) -> Explanation:
-        as_of = as_of or date.today()
-        facts, citations = self._compose(question, as_of, target)
+        """Apply the guardrail and build the response.
 
-        used_llm = False
-        answer = facts
-        narrated = self._narrate(question, facts)
+        Shared by `explain()` and the SSE endpoint so both paths enforce compliance
+        identically — a second implementation is a second thing to get wrong.
+        """
+        answer, used_llm = facts, False
         if narrated:
-            check = check_output(narrated, strict=True)
-            if check.passed:
+            if check_output(narrated, strict=True).passed:
                 answer, used_llm = narrated, True
-            else:
-                # LLM produced non-compliant text -> fall back to the grounded
-                # composition rather than shipping a redacted mess.
-                answer, used_llm = facts, False
+            # Non-compliant narration falls back to the grounded composition rather
+            # than shipping a redacted mess.
 
         final_check = check_output(answer, strict=False)
         return Explanation(
@@ -252,6 +248,13 @@ class Explainer:
             used_llm=used_llm,
             disclaimer=DISCLAIMER,
         )
+
+    def explain(
+        self, question: str, as_of: date | None = None, target: str | None = None
+    ) -> Explanation:
+        as_of = as_of or date.today()
+        facts, citations = self._compose(question, as_of, target)
+        return self.finalise(question, facts, citations, self._narrate(question, facts))
 
 
 __all__ = ["Explainer", "SYSTEM_PROMPT"]
