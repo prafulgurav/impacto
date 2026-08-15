@@ -31,7 +31,13 @@ const withSerwist = withSerwistInit({
   swSrc: 'app/sw.ts',
   swDest: 'public/sw.js',
   disable: process.env.NODE_ENV === 'development',
-  reloadOnOnline: true,
+  // Deliberately off. The sync protocol already reconciles on the `online`
+  // event without touching the DOM, so an automatic reload would buy nothing
+  // and would throw away whatever the user was in the middle of typing.
+  reloadOnOnline: false,
+  // The fallback page has to be in the precache, or a navigation to a route
+  // that was never visited fails outright instead of landing on /offline.
+  additionalPrecacheEntries: [{ url: '/offline', revision: null }],
 });
 
 export default withSerwist(nextConfig);

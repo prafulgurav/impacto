@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 
 import copy from '@/lib/copy/en-IN';
 import { formatDataAge } from '@/lib/format';
-import { dataAge } from '@/lib/db/sync';
 
 /**
  * Shows DATA AGE, not just connection state.
@@ -31,7 +30,11 @@ export function OfflineBanner() {
 
   useEffect(() => {
     if (!offline) return;
-    void dataAge().then(setAge);
+    // Dynamic for the same reason as SyncProvider: this component is in the root
+    // layout, and the data age is only needed once we are actually offline.
+    void import('@/lib/db/sync').then(({ dataAge }) => {
+      void dataAge().then(setAge);
+    });
   }, [offline]);
 
   if (!offline) return null;

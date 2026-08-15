@@ -1,0 +1,39 @@
+name: Lighthouse
+
+on:
+  pull_request:
+
+# Budgets from CLAUDE.md §Performance, measured on the mobile preset with
+# simulated slow 4G and 4x CPU throttling — i.e. the phone this product targets,
+# not the machine it was written on. Build-blocking.
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - uses: pnpm/action-setup@v4
+        with: { version: 11 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+
+      - run: pip install -e ".[dev]"
+      - run: IMPACTO_DATABASE_URL="sqlite:///$PWD/lh.db" alembic upgrade head
+      - run: |
+          IMPACTO_DATABASE_URL="sqlite:///$PWD/lh.db" PYTHONPATH=src \
+            python -m uvicorn impacto.api:app --host 127.0.0.1 --port 8000 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/health && break; sleep 1; done
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - run: API_ORIGIN=http://127.0.0.1:8000 pnpm build
+        working-directory: web
+        env:
+          SERWIST_SUPPRESS_TURBOPACK_WARNING: '1'
+
+      - uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./web/lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true

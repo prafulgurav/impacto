@@ -19,6 +19,28 @@ import { expect, test } from '@playwright/test';
 
 const WARM_UP_MS = 2_000;
 
+/**
+ * Sign in through the real magic-link flow.
+ *
+ * The outbox replays a watchlist edit against /me/watchlist, which is
+ * authenticated — so a signed-out flush correctly refuses and the queue would
+ * never drain. Testing the flush without a session would be testing nothing.
+ *
+ * The API returns the link token directly only when IMPACTO_COOKIE_SECURE is
+ * false, i.e. local and CI. It is never populated in production.
+ */
+async function signIn(page: import('@playwright/test').Page): Promise<boolean> {
+  const link = await page.request.post('/api/auth/magic-link', {
+    data: { email: 'e2e@example.com' },
+  });
+  if (!link.ok()) return false;
+  const { debug_token: token } = (await link.json()) as { debug_token?: string };
+  if (!token) return false;
+
+  const verified = await page.request.post('/api/auth/verify', { data: { token } });
+  return verified.ok();
+}
+
 test.describe('offline-first', () => {
   test('loads, renders cached data with its age, and flushes a queued edit', async ({
     page,
@@ -26,6 +48,8 @@ test.describe('offline-first', () => {
   }) => {
     // --- warm the caches --------------------------------------------------
     await page.goto('/');
+    const authed = await signIn(page);
+    test.skip(!authed, 'API not reachable, or not running in dev-auth mode');
     await page.waitForLoadState('networkidle');
 
     // The service worker must actually take control; asserting on registration
@@ -35,6 +59,12 @@ test.describe('offline-first', () => {
       undefined,
       { timeout: 30_000 },
     );
+
+    // The first document was fetched before the worker existed, so nothing was
+    // cached for it. One more online load puts the navigation through the SW —
+    // which is what a real second launch does, and what "warm launch" means.
+    await page.reload();
+    await page.waitForLoadState('networkidle');
 
     // Give the sync protocol time to write the bundle into IndexedDB.
     await page.waitForTimeout(WARM_UP_MS);
@@ -113,6 +143,10 @@ test.describe('offline-first', () => {
     await page.reload();
     await page.waitForLoadState('networkidle');
 
+    // The page has to be the one replaying: the outbox lives in its Dexie
+    // instance, and startSync() runs the flush on the `online` event.
+    await page.evaluate(() => window.dispatchEvent(new Event('online')));
+
     await expect
       .poll(
         async () =>
@@ -148,6 +182,9 @@ test.describe('offline-first', () => {
     await page.waitForFunction(() => navigator.serviceWorker.controller !== null, undefined, {
       timeout: 30_000,
     });
+    // Same warm-up: the shell has to have passed through the worker once.
+    await page.reload();
+    await page.waitForLoadState('networkidle');
 
     await context.setOffline(true);
     const response = await page.goto('/explore/A_ROUTE_NEVER_VISITED', {

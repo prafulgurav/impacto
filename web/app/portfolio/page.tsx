@@ -7,7 +7,6 @@ import ChannelChip from '@/components/ChannelChip';
 import copy from '@/lib/copy/en-IN';
 import { ApiError, api } from '@/lib/api/client';
 import type { Channel, Holding } from '@/lib/api/client';
-import { enqueue } from '@/lib/db/dexie';
 import { percent, titleCase } from '@/lib/format';
 
 /**
@@ -97,6 +96,7 @@ export default function PortfolioPage() {
         return;
       }
       // Offline or a transient failure: queue it and let the outbox replay.
+      const { enqueue } = await import('@/lib/db/dexie');
       await enqueue('holdings', holdings);
       setStatus('saved');
       setMessage(copy.offline.queuedBody);

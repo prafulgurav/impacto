@@ -9,8 +9,6 @@ import { IosInstallHint } from '@/components/InstallPrompt';
 import copy from '@/lib/copy/en-IN';
 import { ApiError, api, setAccessToken } from '@/lib/api/client';
 import type { MeResponse } from '@/lib/api/client';
-import { META_KEYS, getMeta, pending } from '@/lib/db/dexie';
-import { clearLocalData } from '@/lib/db/sync';
 import { formatDataAge } from '@/lib/format';
 
 export default function SettingsPage() {
@@ -27,8 +25,10 @@ export default function SettingsPage() {
       .catch((error) => {
         if (!(error instanceof ApiError && error.kind === 'unauthorized')) return;
       });
-    void getMeta<string>(META_KEYS.lastSyncAt).then((v) => setLastSync(v ?? null));
-    void pending().then((entries) => setQueued(entries.length));
+    void import('@/lib/db/dexie').then(({ META_KEYS, getMeta, pending }) => {
+      void getMeta<string>(META_KEYS.lastSyncAt).then((v) => setLastSync(v ?? null));
+      void pending().then((entries) => setQueued(entries.length));
+    });
   }, []);
 
   return (
@@ -132,7 +132,11 @@ export default function SettingsPage() {
         )}
         <button
           type="button"
-          onClick={() => void clearLocalData().then(() => setLastSync(null))}
+          onClick={() => {
+            void import('@/lib/db/sync').then(({ clearLocalData }) =>
+              clearLocalData().then(() => setLastSync(null)),
+            );
+          }}
           className="mt-2 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm"
         >
           {copy.settings.clearData}

@@ -14,7 +14,12 @@
   --color-plane: #f9f9f7;
   --color-text-primary: #0b0b0b;
   --color-text-secondary: #52514e;
-  --color-muted: #898781;
+  /* The brief specifies #898781 for --muted in both modes, but measured against
+     the light surfaces that is 3.4:1 — below the 4.5:1 AA threshold for the
+     11px labels this token is used on. Darkened along the same hue and
+     saturation to the first value that clears AA on both #fcfcfb and #f9f9f7.
+     Dark mode keeps #898781, where it measures 4.85:1 and passes. */
+  --color-muted: #74726d;
   --color-grid: #e1e0d9;
   --color-baseline: #c3c2b7;
   --color-border: rgba(11, 11, 11, 0.1);

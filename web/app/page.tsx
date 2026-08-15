@@ -7,7 +7,6 @@ import Link from 'next/link';
 import copy from '@/lib/copy/en-IN';
 import { api } from '@/lib/api/client';
 import type { Alert, Digest } from '@/lib/api/client';
-import { db } from '@/lib/db/dexie';
 import { formatDate } from '@/lib/format';
 
 /**
@@ -29,6 +28,7 @@ export default function TodayPage() {
     // 1. Local first. This is the paint that matters.
     void (async () => {
       try {
+        const { db } = await import('@/lib/db/dexie');
         const stored = await db().digests.orderBy('digestDate').last();
         if (!cancelled && stored) {
           setDigest(stored.payload);
