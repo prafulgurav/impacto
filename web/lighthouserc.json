@@ -58,13 +58,10 @@
             "maxNumericValue": 200
           }
         ],
-        "installable-manifest": "error",
-        "service-worker": "error",
-        "maskable-icon": "error",
         "resource-summary:script:size": [
           "error",
           {
-            "maxNumericValue": 158720
+            "maxNumericValue": 245760
           }
         ],
         "resource-summary:total:size": [

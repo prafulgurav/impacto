@@ -46,7 +46,10 @@ const serwist = new Serwist({
         url.pathname.startsWith('/api/explain') ||
         url.pathname.startsWith('/api/me') ||
         url.pathname.startsWith('/api/auth') ||
-        url.pathname.startsWith('/api/push'),
+        url.pathname.startsWith('/api/push') ||
+        // The reachability probe. A cached liveness check is a contradiction:
+        // it would report the network as up from inside a cache hit.
+        url.pathname === '/api/health',
       handler: new NetworkOnly(),
     },
 

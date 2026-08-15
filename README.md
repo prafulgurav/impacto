@@ -135,7 +135,9 @@ The two tests worth knowing about:
 - `web/tests/e2e/offline.spec.ts` — loads from the service worker with the
   network off, renders the cached digest, shows its data age, queues a watchlist
   edit, and flushes it on reconnect. The one people skip, and the one that
-  catches real bugs.
+  catches real bugs. Note the comment on `cutTheNetwork`: Playwright's
+  `setOffline` does not apply to requests the service worker makes, so an
+  offline test built on it alone leaves the app fully online and proves nothing.
 - `lib/compliance-fixtures.json` — one fixture of blocked and allowed phrases,
   run from **both** pytest and vitest, so the Python guardrail and its
   TypeScript port cannot drift apart silently.

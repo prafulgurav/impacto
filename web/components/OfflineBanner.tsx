@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import copy from '@/lib/copy/en-IN';
 import { formatDataAge } from '@/lib/format';
+import { isReachable } from '@/lib/reachability';
 
 /**
  * Shows DATA AGE, not just connection state.
@@ -12,17 +13,29 @@ import { formatDataAge } from '@/lib/format';
  * "You're offline" tells a user nothing about whether the figure in front of
  * them is two minutes or two weeks old. For a product whose whole claim is that
  * its numbers are auditable, the timestamp is the load-bearing part.
+ *
+ * Reachability is measured rather than read off `navigator.onLine`, because a
+ * device that believes it is online while nothing can actually be fetched is
+ * precisely the case where an unlabelled stale figure reaches a user. See
+ * lib/reachability.ts.
  */
 export function OfflineBanner() {
   const [offline, setOffline] = useState(false);
   const [age, setAge] = useState<string | null>(null);
 
   useEffect(() => {
-    const update = () => setOffline(!navigator.onLine);
+    let cancelled = false;
+
+    const update = () => {
+      void isReachable().then((reachable) => {
+        if (!cancelled) setOffline(!reachable);
+      });
+    };
     update();
     window.addEventListener('online', update);
     window.addEventListener('offline', update);
     return () => {
+      cancelled = true;
       window.removeEventListener('online', update);
       window.removeEventListener('offline', update);
     };

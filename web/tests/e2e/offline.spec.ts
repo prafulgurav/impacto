@@ -10,7 +10,7 @@ import { expect, test } from '@playwright/test';
  * train loses their watchlist.
  *
  * The assertions, in order:
- *   1. with context.setOffline(true) the app loads from the service worker
+ *   1. with the network down the app loads from the service worker
  *   2. it renders the cached digest
  *   3. it displays the correct data age, not just "offline"
  *   4. the user can edit their watchlist while offline
@@ -18,6 +18,47 @@ import { expect, test } from '@playwright/test';
  */
 
 const WARM_UP_MS = 2_000;
+
+/**
+ * Take the network away — from the service worker too.
+ *
+ * `context.setOffline(true)` on its own is not enough, and quietly produces a
+ * test that proves nothing. It stops the *page* from reaching the network, but
+ * the worker keeps its own connection: once a worker controls the page, every
+ * request is its request, so the app carries on being served fresh from the
+ * network while the test believes it is offline. On the Chromium this
+ * Playwright ships, `navigator.onLine` is not even flipped, so nothing in the
+ * app notices either.
+ *
+ * Aborting at the route level does reach the worker, which is what makes the
+ * cached-document assertions below mean anything. setOffline stays on so the
+ * `offline` event still fires, as it would on a real device.
+ */
+async function cutTheNetwork(context: import('@playwright/test').BrowserContext) {
+  await context.route('**/*', (route) => route.abort('internetdisconnected'));
+  await context.setOffline(true);
+}
+
+async function restoreTheNetwork(context: import('@playwright/test').BrowserContext) {
+  await context.unroute('**/*');
+  await context.setOffline(false);
+}
+
+/**
+ * Ask the page whether the network is actually reachable, the same way the app
+ * does. Runs inside the browser, so it goes through the service worker exactly
+ * as a real request would.
+ */
+async function reachable(page: import('@playwright/test').Page): Promise<boolean> {
+  return page.evaluate(async () => {
+    try {
+      await fetch('/api/health', { cache: 'no-store' });
+      return true;
+    } catch {
+      return false;
+    }
+  });
+}
 
 /**
  * Sign in through the real magic-link flow.
@@ -85,24 +126,26 @@ test.describe('offline-first', () => {
     expect(cachedGeneratedAt, 'the bundle should have been cached').toBeTruthy();
 
     // --- 1. the app loads offline ----------------------------------------
-    await context.setOffline(true);
+    await cutTheNetwork(context);
     await page.reload();
 
     // A page served by the service worker still has a title and a shell.
     await expect(page.locator('main')).toBeVisible();
 
-    // The banner is a client component, so three things have to hold before it
-    // can render: the worker must still control the document, the page must
-    // believe it is offline, and React must have hydrated from cached chunks.
-    // Asserting them separately means a failure says which link broke, instead
-    // of only that an element was missing.
+    // The banner is a client component, so two things have to hold before it can
+    // render: the worker must still control the document, and React must have
+    // hydrated from cached chunks. Asserting the preconditions separately means
+    // a failure says which link broke, instead of only that an element was
+    // missing.
     await expect(
       page.evaluate(() => navigator.serviceWorker.controller !== null),
       'the worker should still control the document after an offline reload',
     ).resolves.toBe(true);
+    // Deliberately not asserting navigator.onLine: some Chromium builds leave it
+    // true throughout, which is exactly why the app probes rather than reads it.
     await expect
-      .poll(() => page.evaluate(() => navigator.onLine), {
-        message: 'the page should observe that it is offline',
+      .poll(() => reachable(page), {
+        message: 'the network should be unreachable from the page',
         timeout: 10_000,
       })
       .toBe(false);
@@ -158,7 +201,7 @@ test.describe('offline-first', () => {
     expect(stillQueued, 'the queued edit should survive a reload').toBe(1);
 
     // --- 5. it flushes on reconnect --------------------------------------
-    await context.setOffline(false);
+    await restoreTheNetwork(context);
     await page.reload();
     await page.waitForLoadState('networkidle');
 
@@ -193,6 +236,38 @@ test.describe('offline-first', () => {
     await expect(page.getByTestId('offline-banner')).toBeHidden();
   });
 
+  test('labels the data age even when navigator.onLine claims to be online', async ({
+    page,
+    context,
+  }) => {
+    // A captive portal, a dead cell connection, or a Chromium that simply keeps
+    // reporting true: in all of them the device believes it is online and
+    // nothing can be fetched. If the banner trusted the flag, the figures on
+    // screen would carry no age at all — which is the one thing this product
+    // must never do.
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'onLine', { get: () => true, configurable: true });
+    });
+
+    await page.goto('/');
+    await page.waitForFunction(() => navigator.serviceWorker.controller !== null, undefined, {
+      timeout: 30_000,
+    });
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(WARM_UP_MS);
+
+    // Route-level aborts only, deliberately: no setOffline, so nothing tells the
+    // browser it is offline and the flag keeps insisting everything is fine.
+    await context.route('**/*', (route) => route.abort('internetdisconnected'));
+    await page.reload();
+
+    expect(await page.evaluate(() => navigator.onLine), 'the flag should be lying').toBe(true);
+    expect(await reachable(page), 'but nothing should be reachable').toBe(false);
+    await expect(page.getByTestId('offline-banner')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId('data-age')).toBeVisible();
+  });
+
   test('serves the offline fallback for a route that was never cached', async ({
     page,
     context,
@@ -205,7 +280,7 @@ test.describe('offline-first', () => {
     await page.reload();
     await page.waitForLoadState('networkidle');
 
-    await context.setOffline(true);
+    await cutTheNetwork(context);
     const response = await page.goto('/explore/A_ROUTE_NEVER_VISITED', {
       waitUntil: 'domcontentloaded',
     });

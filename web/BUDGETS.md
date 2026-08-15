@@ -36,6 +36,57 @@ The CI budget is set to 155 KB: the measured floor plus headroom, so a real
 regression in our code still fails the build while the framework floor does not
 fail it on every run.
 
+## Total script weight, which is not first-load JS
+
+`resource-summary:script:size` counts every script byte the page transfers
+during the Lighthouse run, which is a different quantity from the first-load
+figures above. Measured on the Pixel 7 preset:
+
+| Route | Script transfer |
+|---|---:|
+| `/` | 206.7 KB |
+| `/explore` | 212.5 KB |
+| `/explore/[archetype]` | 213.0 KB |
+
+The gap between 140–148 KB of first-load JS and ~213 KB transferred is two
+deliberate things:
+
+- **Dexie, 31.2 KB**, imported dynamically after hydration. It is out of the
+  first-load bundle, but it is still downloaded on every route, because the
+  offline layer is not optional.
+- **~29 KB of other routes' page chunks.** The tab bar links to every top-level
+  route and is on every screen, so the App Router prefetches all of them. For a
+  tab-bar app on 4G that is what prefetch is for: it is what makes switching
+  tabs instant, and it is cheaper in total than fetching each on demand.
+
+The assertion is set to 240 KB — the measured maximum plus headroom. It stays
+tight enough that adding a charting library, the thing this design deliberately
+avoids, fails the build.
+
+## Installability is asserted in Playwright, not Lighthouse
+
+Lighthouse 12 removed the PWA category. `installable-manifest`, `service-worker`
+and `maskable-icon` no longer exist as audits, so asserting on them failed with
+"expected >= 1, but found 0" — a passing config that checked nothing would have
+been the worse outcome. `tests/e2e/pwa.spec.ts` replaces them and checks more:
+the manifest is linked and complete, the worker registers and claims the root
+scope, and **every icon the manifest names is fetched**, because a manifest
+pointing at a missing icon produces no error anywhere — the browser just never
+offers to install the app.
+
+## Connectivity is measured, not read off `navigator.onLine`
+
+`navigator.onLine` reports whether a network interface is up, which is not the
+question. It is true on a captive portal, true on a dead cell connection, and
+true in the Chromium CI runs on while the page is held offline and provably
+served from cache. The offline banner is what attaches an age to the figures on
+screen, so trusting that flag means a stale abnormal return can render with no
+age at all — the one output the product's own rules forbid.
+
+`lib/reachability.ts` probes `/api/health`, which the worker routes
+`NetworkOnly`; a thrown fetch means no network. `tests/e2e/offline.spec.ts`
+covers the lying-flag case directly.
+
 ## Palette — three corrections to a "validated" set
 
 The brief states the token palette has been run through a contrast validator in
