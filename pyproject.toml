@@ -23,6 +23,8 @@ dependencies = [
   "alembic>=1.13",
   "apscheduler>=3.10",
   "cryptography>=42",
+  "pyjwt[crypto]>=2.8",
+  "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]
