@@ -1,0 +1,134 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens — the validated palette from the engine's dashboard.
+ *
+ * These have been run through a colourblindness and contrast validator in both
+ * modes. Tailwind's default palette is deliberately not used anywhere: the
+ * diverging pair below carries polarity meaning (historically positive vs
+ * historically negative), and a substitute that reads as "green good / red bad"
+ * would imply a recommendation the product must never make.
+ */
+@theme {
+  --color-surface-1: #fcfcfb;
+  --color-plane: #f9f9f7;
+  --color-text-primary: #0b0b0b;
+  --color-text-secondary: #52514e;
+  --color-muted: #898781;
+  --color-grid: #e1e0d9;
+  --color-baseline: #c3c2b7;
+  --color-border: rgba(11, 11, 11, 0.1);
+
+  /* Diverging pair — polarity, CVD-safe in both modes. */
+  --color-pos: #2a78d6;
+  --color-neg: #e34948;
+  --color-neutral: #f0efec;
+
+  /* Status — fixed, never themed, always paired with an icon and a label so
+     colour is never the only channel carrying the meaning. */
+  --color-good: #0ca30c;
+  --color-warning: #fab219;
+  --color-serious: #ec835a;
+  --color-critical: #d03b3b;
+
+  /* system-ui only. A 40-120 KB webfont is the single easiest thing to give up
+     on an Indian 4G connection, and system-ui renders Devanagari correctly for
+     the future Hindi digest. */
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Dark is the default on Today — people check markets early and late. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) {
+    --color-surface-1: #1a1a19;
+    --color-plane: #0d0d0d;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #c3c2b7;
+    --color-muted: #898781;
+    --color-grid: #2c2c2a;
+    --color-baseline: #383835;
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-pos: #3987e5;
+    --color-neg: #e66767;
+    --color-neutral: #383835;
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-surface-1: #1a1a19;
+  --color-plane: #0d0d0d;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #c3c2b7;
+  --color-muted: #898781;
+  --color-grid: #2c2c2a;
+  --color-baseline: #383835;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-pos: #3987e5;
+  --color-neg: #e66767;
+  --color-neutral: #383835;
+}
+
+:root {
+  color-scheme: light;
+}
+:root[data-theme='dark'],
+:root:where(:not([data-theme='light'])) {
+  color-scheme: light dark;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-plane);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  /* Room for the bottom tab bar and the sticky disclaimer on mobile. */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Figures line up in columns without the chart shifting under them. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Statistics read as proportional figures in prose, per the mark spec. */
+.pnum {
+  font-variant-numeric: proportional-nums;
+}
+
+:where(a) {
+  color: inherit;
+}
+
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-pos);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
