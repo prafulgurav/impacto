@@ -91,9 +91,28 @@ test.describe('offline-first', () => {
     // A page served by the service worker still has a title and a shell.
     await expect(page.locator('main')).toBeVisible();
 
+    // The banner is a client component, so three things have to hold before it
+    // can render: the worker must still control the document, the page must
+    // believe it is offline, and React must have hydrated from cached chunks.
+    // Asserting them separately means a failure says which link broke, instead
+    // of only that an element was missing.
+    await expect(
+      page.evaluate(() => navigator.serviceWorker.controller !== null),
+      'the worker should still control the document after an offline reload',
+    ).resolves.toBe(true);
+    await expect
+      .poll(() => page.evaluate(() => navigator.onLine), {
+        message: 'the page should observe that it is offline',
+        timeout: 10_000,
+      })
+      .toBe(false);
+
     // --- 2 & 3. cached data, labelled with its age -----------------------
+    // Hydrating offline means parsing every chunk out of Cache Storage, which
+    // on a loaded CI runner is slower than the default 5s expect timeout — and
+    // slow hydration is not the failure this test exists to catch.
     const banner = page.getByTestId('offline-banner');
-    await expect(banner).toBeVisible();
+    await expect(banner).toBeVisible({ timeout: 30_000 });
 
     const age = page.getByTestId('data-age');
     await expect(age).toBeVisible();

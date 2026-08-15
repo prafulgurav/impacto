@@ -6,7 +6,10 @@ on:
   pull_request:
 
 env:
-  IMPACTO_HOLDINGS_ENCRYPTION_KEY: dGVzdC1rZXktZm9yLWNpLW9ubHktMzItYnl0ZXMtbG9uZyE=
+  # base64 of exactly 32 bytes. The holdings columns fail closed on a key of any
+  # other length, which is the intended behaviour — the previous value here was
+  # 35 bytes and CI correctly refused to store anything with it.
+  IMPACTO_HOLDINGS_ENCRYPTION_KEY: aW1wYWN0by1jaS10ZXN0LWtleS1ub3QtYS1zZWNyZXQ=
   IMPACTO_JWT_SECRET: ci-secret-not-used-in-any-deployment
 
 jobs:
@@ -121,4 +124,9 @@ jobs:
         if: failure()
         with:
           name: playwright-report
-          path: web/playwright-report/
+          # test-results/ carries the traces and screenshots; without it a
+          # failure here is only reproducible by guessing.
+          path: |
+            web/playwright-report/
+            web/test-results/
+          retention-days: 7

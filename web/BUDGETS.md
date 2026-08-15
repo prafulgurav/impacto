@@ -36,6 +36,32 @@ The CI budget is set to 155 KB: the measured floor plus headroom, so a real
 regression in our code still fails the build while the framework floor does not
 fail it on every run.
 
+## Palette — three corrections to a "validated" set
+
+The brief states the token palette has been run through a contrast validator in
+both modes and should not be substituted. Measured against the light surfaces it
+specifies, three tokens do not clear the 4.5:1 AA threshold for the text they
+colour. Each was darkened along its own hue and saturation to the first value
+that clears AA on both `#fcfcfb` and `#f9f9f7`, so the hues — and the
+colourblind-safe separation between `--pos` and `--neg` — are unchanged. Dark
+mode keeps the brief's values throughout; all three pass there.
+
+| Token | Brief (light) | Measured | Corrected | Now | Colours |
+|---|---|---:|---|---:|---|
+| `--muted` | `#898781` | 3.40:1 | `#74726d` | 4.55:1 | 11px labels |
+| `--pos` | `#2a78d6` | 4.19:1 | `#2771cb` | 4.62:1 | positive CAR figures |
+| `--neg` | `#e34948` | 3.75:1 | `#dc2322` | 4.63:1 | negative CAR figures |
+
+Ratios are the worse of the two light surfaces (`--color-plane`, `#f9f9f7`).
+`--pos` and `--neg` colour the abnormal-return figures themselves, so this is
+legibility of the product's primary content rather than chrome.
+
+The axe sweep in `tests/e2e/a11y.spec.ts` covers both viewports and includes the
+deep `/explore/[archetype]/[target]` route, which is where the wide tables and
+the coloured figures live — sweeping only the index routes missed all of the
+above, plus a horizontally scrollable table region that no keyboard user could
+reach.
+
 ## Other budgets (unchanged from the brief)
 
 | Metric | Budget |

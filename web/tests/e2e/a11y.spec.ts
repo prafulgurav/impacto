@@ -11,6 +11,11 @@ import { expect, test } from '@playwright/test';
 const ROUTES = [
   '/',
   '/explore',
+  // The deep routes carry the wide tables and the charts, and are where the
+  // interesting violations live — sweeping only /explore missed a scrollable
+  // region that no keyboard user could reach.
+  '/explore/FED_HAWKISH_SURPRISE',
+  '/explore/FED_HAWKISH_SURPRISE/NIFTY_BANK',
   '/ask',
   '/portfolio',
   '/calibration',

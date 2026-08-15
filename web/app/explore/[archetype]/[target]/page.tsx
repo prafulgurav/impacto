@@ -127,12 +127,19 @@ export default async function TargetPage({ params }: Props) {
           </section>
 
           <section>
-            <h2 className="m-0 mb-2 text-sm font-semibold">
+            <h2 id="analogs-heading" className="m-0 mb-2 text-sm font-semibold">
               {copy.explore.analogsHeading}
             </h2>
             {/* Wide content scrolls inside its own container; the page body
-                must never scroll horizontally on a 360px screen. */}
-            <div className="overflow-x-auto">
+                must never scroll horizontally on a 360px screen. Because it
+                scrolls, it also has to be focusable — otherwise the columns
+                past 360px are unreachable without a pointer. */}
+            <div
+              className="overflow-x-auto"
+              tabIndex={0}
+              role="region"
+              aria-labelledby="analogs-heading"
+            >
               <table className="w-full min-w-[420px] border-collapse text-sm">
                 <caption className="sr-only">
                   {copy.explore.analogsHeading}

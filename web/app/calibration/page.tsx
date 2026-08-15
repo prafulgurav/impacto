@@ -79,7 +79,15 @@ export default async function CalibrationPage() {
         ))}
       </section>
 
-      <section className="overflow-x-auto">
+      {/* A region that scrolls horizontally has to be reachable by keyboard, or
+          a keyboard-only user on a 360px screen can never see the two right-hand
+          columns. tabIndex makes it focusable and scrollable with the arrow
+          keys; the label is what a screen reader announces on entering it. */}
+      <section
+        className="overflow-x-auto"
+        tabIndex={0}
+        aria-label={copy.calibration.title}
+      >
         <table className="w-full min-w-[560px] border-collapse text-sm">
           <caption className="sr-only">{copy.calibration.title}</caption>
           <thead>

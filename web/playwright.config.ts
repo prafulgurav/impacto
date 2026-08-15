@@ -9,10 +9,16 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  // The GitHub reporter annotates the diff, but writes no report — a failing CI
+  // run left nothing to upload and nothing to debug from. Emit the HTML report
+  // and keep the trace of anything that failed.
+  reporter: process.env.CI
+    ? [['github'], ['html', { open: 'never' }]]
+    : [['list']],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3000',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
     // Some CI images ship a Chromium that does not match the build this
     // Playwright release expects. Point at it explicitly rather than
     // downloading a second copy on every run.
