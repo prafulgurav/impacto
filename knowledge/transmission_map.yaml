@@ -1,0 +1,744 @@
+# Impacto — Transmission Map
+#
+# THE CORE IP OF THIS REPO.
+#
+# Every entry encodes: global event archetype -> transmission channel(s) ->
+# Indian sector/basket impact, with a direction, a prior magnitude range, a
+# horizon, a confidence grade and a written rationale.
+#
+# Design rules (enforced by tests/test_knowledge.py):
+#   1. Every impact MUST cite >=1 channel defined in channels.yaml.
+#   2. Every impact MUST name a target that exists in universe.yaml.
+#   3. Every impact MUST carry a rationale string (no unexplained signs).
+#   4. Priors are HYPOTHESES, not forecasts. The event-study engine measures the
+#      realised CAR and the calibration report scores prior vs realised.
+#   5. `direction`: -1 negative, 0 ambiguous/two-sided, +1 positive.
+#   6. `magnitude_prior_bps`: [low, high] expected abnormal return over horizon.
+#   7. `confidence`: high | medium | low  — reflects strength of the mechanism
+#      AND the historical sample size available, not conviction about the future.
+#
+# Priors were seeded from published event-study literature and historical NIFTY
+# sector reactions; they are re-fit by `impacto calibrate` against realised
+# CARs once >= min_sample events have been observed. Treat unfitted priors as
+# directional hypotheses only.
+version: 1
+default_estimation_window: 120
+default_event_windows: ["T+0", "T+1", "T+1..T+5", "T+1..T+21"]
+
+archetypes:
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: FED_HAWKISH_SURPRISE
+    label: US Fed hawkish surprise
+    family: monetary_policy
+    description: >
+      FOMC delivers a higher-than-consensus policy rate, or the dot plot / Powell
+      presser shifts materially hawkish versus fed funds futures pricing.
+    detection:
+      keywords: ["fomc", "federal reserve", "rate hike", "dot plot", "powell", "hawkish", "tightening"]
+      indicators: [DFEDTARU, FEDFUNDS]
+      surprise_rule: "actual > consensus OR fed_funds_futures_repricing > +10bps"
+      min_sample: 8
+    impacts:
+      - target: NIFTY_BANK
+        direction: -1
+        magnitude_prior_bps: [-180, -40]
+        horizon: "T+1..T+5"
+        confidence: medium
+        channels: [fii_flow, rate_differential]
+        rationale: >
+          Highest FII ownership in the index and the most liquid vehicle for
+          foreign de-risking, so it absorbs the first wave of outflow. A narrower
+          India-US spread also constrains RBI easing, capping NIM expansion hopes.
+      - target: NIFTY_FINSERV
+        direction: -1
+        magnitude_prior_bps: [-220, -60]
+        horizon: "T+1..T+5"
+        confidence: medium
+        channels: [fii_flow, rate_differential]
+        rationale: >
+          NBFCs borrow wholesale; a higher global rate floor raises the marginal
+          cost of funds and compresses spread with a one-quarter lag.
+      - target: NIFTY_IT
+        direction: 0
+        magnitude_prior_bps: [-80, 90]
+        horizon: "T+1..T+5"
+        confidence: low
+        channels: [fii_flow, usd_translation, end_demand]
+        rationale: >
+          Genuinely two-sided and the most commonly mis-called reaction. A weaker
+          INR is a margin tailwind, but hawkishness driven by strong US growth is
+          demand-positive while hawkishness driven by inflation is discretionary-
+          IT-spend-negative. Read the WHY of the hike before assigning a sign.
+      - target: NIFTY_REALTY
+        direction: -1
+        magnitude_prior_bps: [-300, -80]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [rate_differential, fii_flow]
+        rationale: >
+          Longest-duration domestic cash flows in the listed universe, so the most
+          sensitive to a higher terminal discount rate. Highest beta to rate shocks.
+      - target: NIFTY_50
+        direction: -1
+        magnitude_prior_bps: [-120, -20]
+        horizon: "T+1..T+5"
+        confidence: medium
+        channels: [fii_flow]
+        rationale: >
+          Index-level de-rating via the flow channel; historically shallow and
+          mean-reverting unless accompanied by a USDINR break above trend.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: FED_DOVISH_SURPRISE
+    label: US Fed dovish surprise / pivot
+    family: monetary_policy
+    description: >
+      FOMC cuts more than priced, or guidance turns materially dovish, easing
+      global financial conditions.
+    detection:
+      keywords: ["fomc", "rate cut", "dovish", "pivot", "easing", "powell"]
+      indicators: [DFEDTARU, FEDFUNDS]
+      surprise_rule: "actual < consensus OR fed_funds_futures_repricing < -10bps"
+      min_sample: 6
+    inverse_of: FED_HAWKISH_SURPRISE
+    impacts:
+      - target: NIFTY_BANK
+        direction: 1
+        magnitude_prior_bps: [40, 200]
+        horizon: "T+1..T+5"
+        confidence: medium
+        channels: [fii_flow, rate_differential]
+        rationale: >
+          Easier global conditions revive carry-trade flow into the highest-
+          liquidity FII vehicles; a wider India-US spread also restores RBI
+          policy room.
+      - target: NIFTY_REALTY
+        direction: 1
+        magnitude_prior_bps: [80, 350]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [rate_differential]
+        rationale: >
+          Duration works in reverse — the highest-beta beneficiary of a lower
+          discount rate.
+      - target: NIFTY_METAL
+        direction: 1
+        magnitude_prior_bps: [60, 280]
+        horizon: "T+1..T+21"
+        confidence: low
+        channels: [fii_flow, end_demand]
+        rationale: >
+          A softer USD lifts dollar-denominated commodity prices and global
+          industrial demand expectations. Second-order and noisy.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: US_CPI_UPSIDE_SURPRISE
+    label: US CPI upside surprise
+    family: macro_print
+    description: US headline or core CPI prints above consensus.
+    detection:
+      keywords: ["cpi", "inflation", "consumer price index", "core inflation"]
+      indicators: [CPIAUCSL, CPILFESL]
+      surprise_rule: "actual > consensus by >= 0.1pp"
+      min_sample: 12
+    impacts:
+      - target: NIFTY_50
+        direction: -1
+        magnitude_prior_bps: [-90, -10]
+        horizon: "T+1"
+        confidence: medium
+        channels: [fii_flow, rate_differential]
+        rationale: >
+          Reprices the Fed path hawkishly. The India reaction is largely a
+          same-session gap-down that fades — the print itself has no domestic
+          earnings channel.
+      - target: NIFTY_IT
+        direction: 1
+        magnitude_prior_bps: [-30, 110]
+        horizon: "T+1..T+5"
+        confidence: low
+        channels: [usd_translation]
+        rationale: >
+          Partial hedge — the associated USD strength is INR-revenue accretive,
+          which is why IT often outperforms the index on hot-CPI days even while
+          falling in absolute terms.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: OPEC_SUPPLY_CUT
+    label: OPEC+ production cut / crude spike
+    family: commodity
+    description: >
+      OPEC+ announces output cuts, or Brent rises more than 5% in five sessions
+      on a supply shock.
+    detection:
+      keywords: ["opec", "opec+", "production cut", "output cut", "crude", "brent", "oil supply"]
+      indicators: [DCOILBRENTEU]
+      surprise_rule: "brent_5d_return > 5%"
+      min_sample: 10
+    impacts:
+      - target: OMC
+        direction: -1
+        magnitude_prior_bps: [-450, -120]
+        horizon: "T+1..T+10"
+        confidence: high
+        channels: [input_cost, trade_policy]
+        rationale: >
+          The cleanest, highest-confidence mapping in this file. Oil marketing
+          companies carry regulated/administered retail pricing, so a crude spike
+          compresses marketing margin directly with no pass-through.
+      - target: UPSTREAM_OIL
+        direction: 1
+        magnitude_prior_bps: [100, 500]
+        horizon: "T+1..T+10"
+        confidence: high
+        channels: [input_cost]
+        rationale: >
+          Direct realisation uplift on produced barrels. The mirror image of the
+          OMC trade — this pair is the textbook intra-sector divergence that a
+          headline-level "energy sector" read gets wrong.
+      - target: AVIATION
+        direction: -1
+        magnitude_prior_bps: [-600, -150]
+        horizon: "T+1..T+10"
+        confidence: high
+        channels: [input_cost]
+        rationale: >
+          ATF is 35-40% of airline operating cost with limited hedging in the
+          Indian market and weak short-run fare pass-through.
+      - target: NIFTY_FMCG
+        direction: -1
+        magnitude_prior_bps: [-200, -30]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [input_cost]
+        rationale: >
+          Crude derivatives (packaging, surfactants, LAB) plus freight sit in
+          gross margin with a one-to-two-quarter pass-through lag.
+      - target: NIFTY_50
+        direction: -1
+        magnitude_prior_bps: [-150, -20]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [commodity_terms_of_trade]
+        rationale: >
+          India imports ~85% of crude. A sustained $10/bbl rise widens the current
+          account deficit ~0.4% of GDP and pressures INR — a systemic, not
+          sectoral, headwind.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: CRUDE_COLLAPSE
+    label: Crude price collapse
+    family: commodity
+    description: Brent falls more than 5% in five sessions on demand or supply glut.
+    detection:
+      keywords: ["oil slump", "crude falls", "oil glut", "demand destruction", "brent falls"]
+      indicators: [DCOILBRENTEU]
+      surprise_rule: "brent_5d_return < -5%"
+      min_sample: 10
+    inverse_of: OPEC_SUPPLY_CUT
+    impacts:
+      - target: NIFTY_50
+        direction: 1
+        magnitude_prior_bps: [30, 180]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [commodity_terms_of_trade]
+        rationale: >
+          Improves current account, inflation and fiscal maths simultaneously.
+          The single most reliable broad positive macro shock for India.
+      - target: OMC
+        direction: 1
+        magnitude_prior_bps: [150, 500]
+        horizon: "T+1..T+10"
+        confidence: high
+        channels: [input_cost]
+        rationale: >
+          Marketing margin expands mechanically when administered retail prices lag
+          a falling crude benchmark, the exact mirror of the supply-cut case.
+      - target: AVIATION
+        direction: 1
+        magnitude_prior_bps: [200, 700]
+        horizon: "T+1..T+10"
+        confidence: high
+        channels: [input_cost]
+        rationale: >
+          Direct ATF cost relief on the largest single operating cost line, and Indian
+          carriers hedge little, so the full benefit drops through to margin.
+      - target: UPSTREAM_OIL
+        direction: -1
+        magnitude_prior_bps: [-500, -100]
+        horizon: "T+1..T+10"
+        confidence: high
+        channels: [input_cost]
+        rationale: >
+          Lower realisations per barrel produced feed straight into upstream revenue
+          with no volume offset, since production is capacity- not price-driven.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: US_TARIFF_ON_INDIA
+    label: US tariff or trade action targeting India
+    family: trade_policy
+    description: >
+      US announces tariffs, Section 301 action, GSP withdrawal or export
+      restrictions specifically affecting Indian goods.
+    detection:
+      keywords: ["tariff", "section 301", "trade deal", "ustr", "trade war", "duty on india", "reciprocal tariff"]
+      entities: ["India", "United States Trade Representative"]
+      min_sample: 5
+    impacts:
+      - target: TEXTILES_EXPORT
+        direction: -1
+        magnitude_prior_bps: [-900, -200]
+        horizon: "T+0..T+5"
+        confidence: high
+        channels: [trade_policy, end_demand]
+        rationale: >
+          Highest US revenue concentration and lowest margin buffer of the export
+          complex, so tariff incidence falls almost entirely on the exporter.
+      - target: GEMS_JEWELLERY
+        direction: -1
+        magnitude_prior_bps: [-800, -150]
+        horizon: "T+0..T+5"
+        confidence: medium
+        channels: [trade_policy]
+        rationale: >
+          The US is the largest export market for Indian cut and polished diamonds, and
+          the trade runs on thin margins with almost no ability to absorb a duty.
+      - target: US_GENERICS
+        direction: -1
+        magnitude_prior_bps: [-400, -80]
+        horizon: "T+0..T+10"
+        confidence: medium
+        channels: [trade_policy, regulatory_access]
+        rationale: >
+          Direct exposure, but generics are frequently carved out of tariff lists
+          on public-health grounds — verify the schedule before assuming the sign.
+      - target: NIFTY_IT
+        direction: -1
+        magnitude_prior_bps: [-250, -30]
+        horizon: "T+0..T+5"
+        confidence: low
+        channels: [trade_policy, end_demand]
+        rationale: >
+          Services are usually outside goods tariffs; the hit is sentiment and
+          escalation risk (visa/data rules) rather than a direct earnings channel.
+      - target: NIFTY_50
+        direction: -1
+        magnitude_prior_bps: [-200, -30]
+        horizon: "T+0..T+5"
+        confidence: medium
+        channels: [trade_policy, safe_haven]
+        rationale: >
+          Index-level risk-off plus a growth-outlook markdown for the whole export
+          complex, compounded by escalation risk to services and visa policy.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: US_TARIFF_ON_CHINA
+    label: US tariff or export control targeting China
+    family: trade_policy
+    description: >
+      US raises tariffs on Chinese goods or tightens technology export controls
+      against China, without a symmetric action against India.
+    detection:
+      keywords: ["china tariff", "entity list", "export controls", "decoupling", "de-risking", "china plus one"]
+      entities: ["China"]
+      min_sample: 6
+    impacts:
+      - target: CHEMICALS
+        direction: 1
+        magnitude_prior_bps: [80, 500]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [competitive_substitution, trade_policy]
+        rationale: >
+          China+1 substitution thesis — Indian specialty chemical capacity is the
+          most credible near-term alternative supply for several intermediates.
+      - target: TEXTILES_EXPORT
+        direction: 1
+        magnitude_prior_bps: [100, 600]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [competitive_substitution]
+        rationale: >
+          Order-book share shifts from Chinese to Indian and Bangladeshi mills as US
+          buyers re-source, though the gain accrues over quarters rather than days.
+      - target: CHINA_API_DEPENDENT
+        direction: -1
+        magnitude_prior_bps: [-400, -50]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [supply_chain, input_cost]
+        rationale: >
+          Cuts the other way — Indian pharma imports roughly 70% of its APIs and
+          key starting materials from China. Trade friction raises input cost even
+          when India is not the target. A frequently missed second-order effect.
+      - target: NIFTY_METAL
+        direction: 0
+        magnitude_prior_bps: [-250, 250]
+        horizon: "T+1..T+21"
+        confidence: low
+        channels: [trade_policy, end_demand, competitive_substitution]
+        rationale: >
+          Ambiguous by construction. Restricted Chinese steel exports can be
+          redirected and dumped into India (negative), while global price
+          dislocation can be positive. Requires the dumping-flow read.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: CHINA_STIMULUS
+    label: China large-scale stimulus
+    family: foreign_fiscal
+    description: >
+      China announces major fiscal or monetary stimulus, property-sector rescue
+      or infrastructure spending package.
+    detection:
+      keywords: ["china stimulus", "pboc", "npc", "property rescue", "special bonds", "rrr cut"]
+      entities: ["China", "People's Bank of China"]
+      min_sample: 5
+    impacts:
+      - target: NIFTY_METAL
+        direction: 1
+        magnitude_prior_bps: [150, 700]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [end_demand, input_cost]
+        rationale: >
+          China consumes over half of global steel and copper. Stimulus lifts
+          global metal prices, which flows straight into Indian producer
+          realisations even though the demand is offshore.
+      - target: NIFTY_50
+        direction: -1
+        magnitude_prior_bps: [-150, 40]
+        horizon: "T+1..T+21"
+        confidence: low
+        channels: [fii_flow]
+        rationale: >
+          The uncomfortable one. Large China stimulus historically triggers EM
+          allocation rotation OUT of India INTO China, so an India-only investor
+          can see metals rally while the index de-rates on outflow. Sign is
+          contested and sample-dependent — treat as a hypothesis to test.
+      - target: NIFTY_ENERGY
+        direction: 1
+        magnitude_prior_bps: [50, 300]
+        horizon: "T+1..T+21"
+        confidence: low
+        channels: [end_demand, commodity_terms_of_trade]
+        rationale: >
+          Higher Chinese industrial demand lifts the global energy complex, supporting
+          realisations for Indian upstream producers and integrated refiners.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: GEOPOLITICAL_CONFLICT_SHOCK
+    label: Geopolitical conflict escalation
+    family: geopolitics
+    description: >
+      Armed conflict escalation, major terror event, or blockade of a strategic
+      trade chokepoint (Hormuz, Suez, Red Sea, Taiwan Strait).
+    detection:
+      keywords: ["war", "airstrike", "invasion", "missile", "blockade", "strait of hormuz", "red sea", "escalation"]
+      gdelt_event_root_codes: ["19", "18", "20"]
+      min_sample: 8
+    impacts:
+      - target: NIFTY_50
+        direction: -1
+        magnitude_prior_bps: [-250, -40]
+        horizon: "T+0..T+3"
+        confidence: medium
+        channels: [safe_haven]
+        rationale: >
+          Volatility-driven de-rating. Critically, historical event studies show
+          conflict-shock CARs typically fully mean-revert within 10-15 sessions
+          UNLESS the event opens a durable earnings channel (oil, shipping,
+          sanctions). Separating the two cases is the whole analytical job here.
+      - target: SHIPPING_LOGISTICS
+        direction: 1
+        magnitude_prior_bps: [100, 800]
+        horizon: "T+0..T+10"
+        confidence: medium
+        channels: [supply_chain]
+        rationale: >
+          Chokepoint disruption raises freight rates and charter day-rates —
+          shipping owners are net beneficiaries of the disruption they cause.
+      - target: DEFENCE
+        direction: 1
+        magnitude_prior_bps: [150, 900]
+        horizon: "T+0..T+21"
+        confidence: medium
+        channels: [end_demand]
+        rationale: >
+          Order-book expectation re-rating on higher defence budgets. Note this is
+          almost entirely a multiple re-rating, not near-term earnings.
+      - target: AVIATION
+        direction: -1
+        magnitude_prior_bps: [-700, -100]
+        horizon: "T+0..T+10"
+        confidence: medium
+        channels: [input_cost, supply_chain]
+        rationale: >
+          A fuel spike plus airspace-closure route lengthening hits both the largest
+          cost line and block hours at the same time.
+      - target: NIFTY_BANK
+        direction: -1
+        magnitude_prior_bps: [-300, -50]
+        horizon: "T+0..T+3"
+        confidence: medium
+        channels: [safe_haven, fii_flow]
+        rationale: >
+          The highest-beta risk-off proxy in the index, and the deepest liquidity pool,
+          so it absorbs the mechanical de-risking flow first.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: USD_STRENGTH_SHOCK
+    label: Broad USD strength shock
+    family: currency
+    description: DXY rises more than 2% in ten sessions, or USDINR breaks to a new high.
+    detection:
+      keywords: ["dollar index", "dxy", "rupee record low", "dollar surge", "usdinr"]
+      indicators: [DTWEXBGS, DEXINUS]
+      surprise_rule: "dxy_10d_return > 2%"
+      min_sample: 12
+    impacts:
+      - target: NIFTY_IT
+        direction: 1
+        magnitude_prior_bps: [40, 250]
+        horizon: "T+1..T+21"
+        confidence: high
+        channels: [usd_translation]
+        rationale: >
+          The most mechanically reliable positive mapping in this file. ~85% of
+          sector revenue is USD-denominated against a largely INR cost base;
+          roughly +1% USDINR adds ~30-40bps to EBIT margin pre-hedge.
+      - target: US_GENERICS
+        direction: 1
+        magnitude_prior_bps: [30, 200]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [usd_translation]
+        rationale: >
+          Similar USD translation benefit on US generics revenue, partly offset by the
+          higher INR cost of imported APIs, so the net effect is smaller than for IT.
+      - target: NIFTY_ENERGY
+        direction: -1
+        magnitude_prior_bps: [-300, -50]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [input_cost]
+        rationale: >
+          Crude is USD-priced, so a weaker INR raises the landed cost of the single
+          largest import in the economy and compresses refining and power margins.
+      - target: NIFTY_AUTO
+        direction: -1
+        magnitude_prior_bps: [-250, -30]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [input_cost]
+        rationale: >
+          Imported components, semiconductors and commodity inputs are dollar-linked,
+          so a weaker INR raises bill-of-materials cost ahead of any price increase.
+      - target: NIFTY_BANK
+        direction: -1
+        magnitude_prior_bps: [-200, -20]
+        horizon: "T+1..T+10"
+        confidence: medium
+        channels: [fii_flow]
+        rationale: >
+          Currency depreciation raises the unhedged return hurdle for foreign investors
+          and accelerates outflow from the most liquid, highest-FII-owned names.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: SEMICONDUCTOR_EXPORT_CONTROL
+    label: Semiconductor export control action
+    family: trade_policy
+    description: >
+      New restrictions on advanced chips, chipmaking equipment, or HBM/AI
+      accelerator exports (BIS entity listings, allied controls).
+    detection:
+      keywords: ["export control", "semiconductor", "chip ban", "entity list", "bis rule", "gpu export", "advanced computing"]
+      min_sample: 4
+    impacts:
+      - target: NIFTY_AUTO
+        direction: -1
+        magnitude_prior_bps: [-300, -40]
+        horizon: "T+1..T+21"
+        confidence: low
+        channels: [supply_chain, input_cost]
+        rationale: >
+          Controls target advanced logic, while autos consume mature-node chips —
+          the direct link is weak. Risk is second-order fab capacity reallocation.
+          Deliberately graded low confidence; do not over-read this one.
+      - target: NIFTY_IT
+        direction: 0
+        magnitude_prior_bps: [-200, 200]
+        horizon: "T+1..T+21"
+        confidence: low
+        channels: [end_demand, regulatory_access]
+        rationale: >
+          Two-sided — constrained global AI capex could slow hyperscaler-linked
+          deal flow, but supply-chain redesign work is a services revenue pool.
+      - target: SOLAR_RENEWABLE
+        direction: 1
+        magnitude_prior_bps: [50, 400]
+        horizon: "T+1..T+21"
+        confidence: low
+        channels: [competitive_substitution]
+        rationale: >
+          Broader tech decoupling strengthens the case for domestic PLI-backed
+          manufacturing capacity. Thematic and slow-burning, not an event trade.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: US_IMMIGRATION_VISA_TIGHTENING
+    label: US visa / H-1B tightening
+    family: regulatory
+    description: >
+      US raises H-1B fees, tightens eligibility, restricts L-1 transfers or
+      imposes new onshore-hiring conditions.
+    detection:
+      keywords: ["h-1b", "h1b", "visa fee", "uscis", "immigration", "work visa", "onshore hiring"]
+      min_sample: 5
+    impacts:
+      - target: EXPORT_IT_SERVICES
+        direction: -1
+        magnitude_prior_bps: [-700, -150]
+        horizon: "T+0..T+10"
+        confidence: high
+        channels: [regulatory_access, input_cost]
+        rationale: >
+          Directly raises onsite delivery cost per FTE and forces local hiring at
+          2-3x the offshore rate. Historically one of the sharpest single-day
+          sector drawdowns in the Indian market, with midcap IT falling harder
+          than largecap because of thinner onsite-mix flexibility and weaker
+          balance-sheet capacity to absorb fees.
+      - target: NIFTY_IT
+        direction: -1
+        magnitude_prior_bps: [-600, -120]
+        horizon: "T+0..T+10"
+        confidence: high
+        channels: [regulatory_access]
+        rationale: >
+          The same mechanism at index level, diluted by the largecap offshore-mix
+          advantage and stronger balance sheets that can absorb a fee increase.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: FII_SUSTAINED_OUTFLOW
+    label: Sustained FII outflow episode
+    family: flows
+    description: >
+      Net FPI equity selling exceeds a threshold over a rolling window (default
+      ₹20,000 crore over 10 sessions).
+    detection:
+      keywords: ["fii selling", "fpi outflow", "foreign investors sell", "record outflows"]
+      indicators: [NSE_FII_CASH_NET]
+      surprise_rule: "fii_net_10d < -20000_cr"
+      min_sample: 10
+    impacts:
+      - target: NIFTY_BANK
+        direction: -1
+        magnitude_prior_bps: [-400, -80]
+        horizon: "T+0..T+10"
+        confidence: high
+        channels: [fii_flow]
+        rationale: >
+          Highest FII ownership and deepest liquidity, so it is sold first and
+          hardest. Ownership concentration, not fundamentals, drives the ranking.
+      - target: NIFTY_FINSERV
+        direction: -1
+        magnitude_prior_bps: [-380, -70]
+        horizon: "T+0..T+10"
+        confidence: high
+        channels: [fii_flow]
+        rationale: >
+          The same ownership-concentration mechanism as banks: NBFCs and insurers carry
+          heavy foreign registers, so passive outflow hits them regardless of results.
+      - target: NIFTY_PSU_BANK
+        direction: 0
+        magnitude_prior_bps: [-150, 150]
+        horizon: "T+0..T+10"
+        confidence: medium
+        channels: [fii_flow]
+        rationale: >
+          Relative outperformer during FII-led selloffs because low foreign
+          ownership means little to sell and DII/retail flow dominates the register.
+          A useful defensive-rotation read that ownership data makes visible.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: GOLD_SPIKE
+    label: Gold price spike
+    family: commodity
+    description: Gold rises more than 4% in ten sessions on risk-off or real-rate collapse.
+    detection:
+      keywords: ["gold record", "gold rally", "bullion surge", "safe haven demand"]
+      indicators: [GOLDAMGBD228NLBM]
+      surprise_rule: "gold_10d_return > 4%"
+      min_sample: 8
+    impacts:
+      - target: GEMS_JEWELLERY
+        direction: 0
+        magnitude_prior_bps: [-300, 300]
+        horizon: "T+1..T+21"
+        confidence: low
+        channels: [input_cost, end_demand]
+        rationale: >
+          Genuinely two-sided. Inventory gains and higher ticket values lift
+          reported revenue, but demand elasticity in India is high and volume
+          contracts sharply at record prices. Net sign depends on hedging policy
+          and the studded-jewellery mix — check company disclosures, not the
+          headline.
+      - target: NIFTY_50
+        direction: -1
+        magnitude_prior_bps: [-120, 20]
+        horizon: "T+1..T+10"
+        confidence: low
+        channels: [safe_haven, commodity_terms_of_trade]
+        rationale: >
+          Gold is India's second-largest import; a spike widens the trade deficit
+          and usually co-occurs with equity risk-off.
+
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: US_RECESSION_SIGNAL
+    label: US growth scare / recession signal
+    family: macro_print
+    description: >
+      Sharp deterioration in US ISM, payrolls (Sahm rule trigger) or a jobless
+      claims spike that shifts the market narrative to recession.
+    detection:
+      keywords: ["recession", "sahm rule", "payrolls miss", "ism contraction", "jobless claims surge", "hard landing"]
+      indicators: [UNRATE, PAYEMS, USREC]
+      min_sample: 6
+    impacts:
+      - target: EXPORT_IT_SERVICES
+        direction: -1
+        magnitude_prior_bps: [-600, -100]
+        horizon: "T+1..T+21"
+        confidence: high
+        channels: [end_demand]
+        rationale: >
+          Discretionary IT budgets are the first line cut in a US downturn, and
+          BFSI clients (the largest India IT vertical) cut earliest. Deal-cycle
+          lengthening shows up in TCV before it shows in revenue.
+      - target: NIFTY_METAL
+        direction: -1
+        magnitude_prior_bps: [-500, -80]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [end_demand]
+        rationale: >
+          A global industrial demand markdown feeds directly into commodity pricing,
+          and Indian producers are price takers on globally set steel and aluminium.
+      - target: NIFTY_FMCG
+        direction: 1
+        magnitude_prior_bps: [-50, 200]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [end_demand, safe_haven]
+        rationale: >
+          Defensive rotation. Domestic-consumption cash flows with negligible
+          export exposure outperform on a relative basis even in a falling market.
+      - target: NIFTY_PHARMA
+        direction: 1
+        magnitude_prior_bps: [-50, 220]
+        horizon: "T+1..T+21"
+        confidence: medium
+        channels: [end_demand]
+        rationale: >
+          Non-cyclical end demand plus USD-denominated export revenue makes pharma the
+          classic Indian defensive during a US growth scare.

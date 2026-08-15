@@ -1,0 +1,114 @@
+# Impacto — Transmission Channels
+#
+# A "channel" is the economic mechanism through which a global event reaches an
+# Indian listed company's cash flows or discount rate. Every sector impact claim
+# in transmission_map.yaml MUST cite at least one channel. This is what separates
+# a defensible causal model from headline-matching sentiment.
+version: 1
+
+channels:
+  - id: fii_flow
+    name: Foreign portfolio investor flow
+    kind: discount_rate
+    horizon: fast            # hours to days
+    description: >
+      Global risk appetite and US real-rate levels drive FPI allocation to Indian
+      equities. Outflows hit high-FII-ownership, high-float largecaps first
+      (private banks, IT, financial services) regardless of domestic fundamentals.
+    observable_proxies: [NSE_FII_CASH_NET, DXY, US10Y_REAL]
+
+  - id: rate_differential
+    name: India-US rate differential
+    kind: discount_rate
+    horizon: medium          # days to weeks
+    description: >
+      Narrowing India-US yield spread pressures INR and constrains RBI's room to
+      cut. Compresses NBFC/bank NIM expectations and lengthens the duration
+      discount on long-cash-flow assets (realty, growth names).
+    observable_proxies: [IND10Y, US10Y, USDINR]
+
+  - id: usd_translation
+    name: USD revenue translation
+    kind: earnings
+    horizon: medium
+    description: >
+      A weaker INR mechanically raises the INR value of USD-denominated revenue.
+      Roughly +1% USDINR adds ~30-40bps to IT services EBIT margin before hedges.
+      Direction is opposite for importers.
+    observable_proxies: [USDINR]
+
+  - id: input_cost
+    name: Imported input cost
+    kind: earnings
+    horizon: medium
+    description: >
+      Crude, coking coal, palm oil, APIs, and semiconductors are import-priced.
+      Cost shocks compress gross margin for downstream manufacturers with a
+      one-to-two-quarter pass-through lag.
+    observable_proxies: [BRENT, LME_COPPER, CRB]
+
+  - id: end_demand
+    name: Export end-demand
+    kind: earnings
+    horizon: slow            # weeks to quarters
+    description: >
+      US/EU/China demand conditions set order books for IT services, textiles,
+      chemicals, auto components and gems & jewellery.
+    observable_proxies: [US_ISM_PMI, EU_PMI, CHINA_PMI]
+
+  - id: trade_policy
+    name: Tariff and trade policy
+    kind: earnings
+    horizon: fast
+    description: >
+      Tariffs, quotas, anti-dumping duties and export controls directly reprice
+      the affected trade lane. Can be positive for India (China+1 substitution)
+      or negative (direct tariff on Indian goods).
+    observable_proxies: [USTR_ACTIONS, INDIA_EXPORT_DATA]
+
+  - id: commodity_terms_of_trade
+    name: Commodity terms of trade
+    kind: macro
+    horizon: medium
+    description: >
+      India imports ~85% of its crude. Falling oil is a broad positive shock to
+      the current account, inflation and fiscal position — a systemic tailwind,
+      not just a sector effect. Rising oil is the reverse.
+    observable_proxies: [BRENT, INDIA_CAD, INDIA_CPI]
+
+  - id: safe_haven
+    name: Safe-haven and risk-off repricing
+    kind: discount_rate
+    horizon: fast
+    description: >
+      Geopolitical shocks trigger gold/USD/treasury bids and equity de-rating.
+      In India this shows up as an India VIX spike and beta-driven selling that
+      typically mean-reverts within 5-15 sessions absent a real earnings channel.
+    observable_proxies: [INDIA_VIX, GOLD, DXY]
+
+  - id: supply_chain
+    name: Physical supply chain disruption
+    kind: earnings
+    horizon: medium
+    description: >
+      Shipping lane closures, port congestion, export bans and chip shortages
+      raise freight cost and lengthen lead times.
+    observable_proxies: [BDI, FREIGHTOS_FBX]
+
+  - id: regulatory_access
+    name: Foreign regulatory and market access
+    kind: earnings
+    horizon: slow
+    description: >
+      US FDA actions, H-1B/visa policy, EU CBAM and data-localisation rules gate
+      access to foreign revenue pools for pharma, IT and metals.
+    observable_proxies: [FDA_ACTIONS, USCIS_POLICY]
+
+  - id: competitive_substitution
+    name: Competitive substitution
+    kind: earnings
+    horizon: slow
+    description: >
+      Policy that penalises a competitor nation can be a structural positive for
+      Indian capacity (China+1 in chemicals, electronics, textiles).
+    observable_proxies: [CHINA_EXPORT_SHARE, PLI_DISBURSEMENT]

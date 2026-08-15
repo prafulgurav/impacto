@@ -1,0 +1,597 @@
+{
+ "seed": 20260815,
+ "start": "2017-01-02",
+ "end": "2026-08-14",
+ "mkt_drift": 0.00045,
+ "mkt_vol": 0.0091,
+ "default_symbol": {
+  "beta": 1.0,
+  "idio_vol": 0.015,
+  "start_price": 1000.0,
+  "alpha": 0.0
+ },
+ "symbols": {
+  "^NSEI": {
+   "beta": 1.0,
+   "idio_vol": 0.0,
+   "start_price": 8000.0,
+   "alpha": 0.0
+  },
+  "^NSEBANK": {
+   "beta": 1.15,
+   "idio_vol": 0.0085,
+   "start_price": 24651.471496179453,
+   "alpha": 0.0
+  },
+  "HDFCBANK.NS": {
+   "beta": 1.215646771909805,
+   "idio_vol": 0.013,
+   "start_price": 1607.8649166025234,
+   "alpha": 0.0
+  },
+  "ICICIBANK.NS": {
+   "beta": 1.128012428535437,
+   "idio_vol": 0.013,
+   "start_price": 208.31213047545475,
+   "alpha": 0.0
+  },
+  "SBIN.NS": {
+   "beta": 0.9790661839819751,
+   "idio_vol": 0.013,
+   "start_price": 766.0200762439091,
+   "alpha": 0.0
+  },
+  "AXISBANK.NS": {
+   "beta": 0.8605061457576065,
+   "idio_vol": 0.013,
+   "start_price": 764.2160146750396,
+   "alpha": 0.0
+  },
+  "KOTAKBANK.NS": {
+   "beta": 1.2567470024897192,
+   "idio_vol": 0.013,
+   "start_price": 2937.115217371232,
+   "alpha": 0.0
+  },
+  "^CNXIT": {
+   "beta": 0.85,
+   "idio_vol": 0.0085,
+   "start_price": 17062.400464593262,
+   "alpha": 0.0
+  },
+  "TCS.NS": {
+   "beta": 0.8798291465269111,
+   "idio_vol": 0.013,
+   "start_price": 2148.1849963600966,
+   "alpha": 0.0
+  },
+  "INFY.NS": {
+   "beta": 0.7688726131165695,
+   "idio_vol": 0.013,
+   "start_price": 262.082479499345,
+   "alpha": 0.0
+  },
+  "HCLTECH.NS": {
+   "beta": 0.9572003902735373,
+   "idio_vol": 0.013,
+   "start_price": 2797.131867125615,
+   "alpha": 0.0
+  },
+  "WIPRO.NS": {
+   "beta": 0.9486056808068228,
+   "idio_vol": 0.013,
+   "start_price": 2205.080933245252,
+   "alpha": 0.0
+  },
+  "TECHM.NS": {
+   "beta": 0.7505302788114141,
+   "idio_vol": 0.013,
+   "start_price": 2507.2566109601553,
+   "alpha": 0.0
+  },
+  "LTIM.NS": {
+   "beta": 0.7671240849003289,
+   "idio_vol": 0.013,
+   "start_price": 557.5808395330259,
+   "alpha": 0.0
+  },
+  "^CNXAUTO": {
+   "beta": 1.05,
+   "idio_vol": 0.0085,
+   "start_price": 35274.16232756965,
+   "alpha": 0.0
+  },
+  "MARUTI.NS": {
+   "beta": 1.001704232403973,
+   "idio_vol": 0.013,
+   "start_price": 785.2695009956653,
+   "alpha": 0.0
+  },
+  "M&M.NS": {
+   "beta": 1.209360596684536,
+   "idio_vol": 0.013,
+   "start_price": 2406.036421682851,
+   "alpha": 0.0
+  },
+  "TATAMOTORS.NS": {
+   "beta": 1.125375104537426,
+   "idio_vol": 0.013,
+   "start_price": 1092.2821361172246,
+   "alpha": 0.0
+  },
+  "BAJAJ-AUTO.NS": {
+   "beta": 1.1186519093824057,
+   "idio_vol": 0.013,
+   "start_price": 1594.2426733098982,
+   "alpha": 0.0
+  },
+  "EICHERMOT.NS": {
+   "beta": 1.0175570008331927,
+   "idio_vol": 0.013,
+   "start_price": 2414.9436279586816,
+   "alpha": 0.0
+  },
+  "^CNXENERGY": {
+   "beta": 0.95,
+   "idio_vol": 0.0085,
+   "start_price": 34719.483822145354,
+   "alpha": 0.0
+  },
+  "RELIANCE.NS": {
+   "beta": 1.1526619101974764,
+   "idio_vol": 0.013,
+   "start_price": 273.3593572950624,
+   "alpha": 0.0
+  },
+  "ONGC.NS": {
+   "beta": 0.8740007374282253,
+   "idio_vol": 0.013,
+   "start_price": 2323.1668327213247,
+   "alpha": 0.0
+  },
+  "IOC.NS": {
+   "beta": 1.1985449227293394,
+   "idio_vol": 0.013,
+   "start_price": 2537.31407105353,
+   "alpha": 0.0
+  },
+  "BPCL.NS": {
+   "beta": 0.7845955144772766,
+   "idio_vol": 0.013,
+   "start_price": 288.24389900438007,
+   "alpha": 0.0
+  },
+  "HINDPETRO.NS": {
+   "beta": 0.9584248491028856,
+   "idio_vol": 0.013,
+   "start_price": 1140.9810042458184,
+   "alpha": 0.0
+  },
+  "NTPC.NS": {
+   "beta": 0.9613373809317517,
+   "idio_vol": 0.013,
+   "start_price": 1586.2409301434727,
+   "alpha": 0.0
+  },
+  "^CNXPHARMA": {
+   "beta": 0.7,
+   "idio_vol": 0.0085,
+   "start_price": 17302.790938229984,
+   "alpha": 0.0
+  },
+  "SUNPHARMA.NS": {
+   "beta": 0.8197152955118282,
+   "idio_vol": 0.013,
+   "start_price": 1205.2590587793695,
+   "alpha": 0.0
+  },
+  "DRREDDY.NS": {
+   "beta": 0.7417625656307353,
+   "idio_vol": 0.013,
+   "start_price": 3338.863667162652,
+   "alpha": 0.0
+  },
+  "CIPLA.NS": {
+   "beta": 0.5790968209336663,
+   "idio_vol": 0.013,
+   "start_price": 736.6004609241882,
+   "alpha": 0.0
+  },
+  "LUPIN.NS": {
+   "beta": 0.4548464938808886,
+   "idio_vol": 0.013,
+   "start_price": 2820.5567015764746,
+   "alpha": 0.0
+  },
+  "DIVISLAB.NS": {
+   "beta": 0.7385923763161529,
+   "idio_vol": 0.013,
+   "start_price": 2848.613411755991,
+   "alpha": 0.0
+  },
+  "^CNXMETAL": {
+   "beta": 1.35,
+   "idio_vol": 0.0085,
+   "start_price": 40507.73018047171,
+   "alpha": 0.0
+  },
+  "TATASTEEL.NS": {
+   "beta": 1.3058207350877562,
+   "idio_vol": 0.013,
+   "start_price": 639.3139633395496,
+   "alpha": 0.0
+  },
+  "JSWSTEEL.NS": {
+   "beta": 1.5443856626528771,
+   "idio_vol": 0.013,
+   "start_price": 899.062188802832,
+   "alpha": 0.0
+  },
+  "HINDALCO.NS": {
+   "beta": 1.2341018548654652,
+   "idio_vol": 0.013,
+   "start_price": 3788.8317989658417,
+   "alpha": 0.0
+  },
+  "VEDL.NS": {
+   "beta": 1.2227394337418418,
+   "idio_vol": 0.013,
+   "start_price": 160.56339314639064,
+   "alpha": 0.0
+  },
+  "JINDALSTEL.NS": {
+   "beta": 1.1857647083765868,
+   "idio_vol": 0.013,
+   "start_price": 3017.354318492407,
+   "alpha": 0.0
+  },
+  "^CNXFMCG": {
+   "beta": 0.65,
+   "idio_vol": 0.0085,
+   "start_price": 30953.218689673093,
+   "alpha": 0.0
+  },
+  "HINDUNILVR.NS": {
+   "beta": 0.6303005000015974,
+   "idio_vol": 0.013,
+   "start_price": 834.4705567654388,
+   "alpha": 0.0
+  },
+  "ITC.NS": {
+   "beta": 0.5948726152659437,
+   "idio_vol": 0.013,
+   "start_price": 3003.3028313279287,
+   "alpha": 0.0
+  },
+  "NESTLEIND.NS": {
+   "beta": 0.4630893617410801,
+   "idio_vol": 0.013,
+   "start_price": 3314.2129057504503,
+   "alpha": 0.0
+  },
+  "BRITANNIA.NS": {
+   "beta": 0.7537634310089325,
+   "idio_vol": 0.013,
+   "start_price": 1691.7717763433652,
+   "alpha": 0.0
+  },
+  "DABUR.NS": {
+   "beta": 0.5879035422662892,
+   "idio_vol": 0.013,
+   "start_price": 2234.6697380687688,
+   "alpha": 0.0
+  },
+  "^CNXREALTY": {
+   "beta": 1.45,
+   "idio_vol": 0.0085,
+   "start_price": 35775.72222791727,
+   "alpha": 0.0
+  },
+  "DLF.NS": {
+   "beta": 1.204955962667428,
+   "idio_vol": 0.013,
+   "start_price": 535.6823359028194,
+   "alpha": 0.0
+  },
+  "GODREJPROP.NS": {
+   "beta": 1.3390796066905377,
+   "idio_vol": 0.013,
+   "start_price": 2352.7699370902974,
+   "alpha": 0.0
+  },
+  "OBEROIRLTY.NS": {
+   "beta": 1.5478154071015389,
+   "idio_vol": 0.013,
+   "start_price": 3917.055638877848,
+   "alpha": 0.0
+  },
+  "PRESTIGE.NS": {
+   "beta": 1.557144619168474,
+   "idio_vol": 0.013,
+   "start_price": 3777.983191617477,
+   "alpha": 0.0
+  },
+  "^CNXFINANCE": {
+   "beta": 1.1,
+   "idio_vol": 0.0085,
+   "start_price": 30609.54803673004,
+   "alpha": 0.0
+  },
+  "BAJFINANCE.NS": {
+   "beta": 1.1031588907861376,
+   "idio_vol": 0.013,
+   "start_price": 3535.424049947426,
+   "alpha": 0.0
+  },
+  "BAJAJFINSV.NS": {
+   "beta": 1.321803293278295,
+   "idio_vol": 0.013,
+   "start_price": 2955.955955020192,
+   "alpha": 0.0
+  },
+  "HDFCLIFE.NS": {
+   "beta": 1.1758401598818056,
+   "idio_vol": 0.013,
+   "start_price": 1137.8316226059214,
+   "alpha": 0.0
+  },
+  "SBILIFE.NS": {
+   "beta": 1.0221126960850562,
+   "idio_vol": 0.013,
+   "start_price": 567.7921831228091,
+   "alpha": 0.0
+  },
+  "CHOLAFIN.NS": {
+   "beta": 1.1523789555075856,
+   "idio_vol": 0.013,
+   "start_price": 628.9047376043695,
+   "alpha": 0.0
+  },
+  "^CNXPSUBANK": {
+   "beta": 1.25,
+   "idio_vol": 0.0085,
+   "start_price": 11495.468184421003,
+   "alpha": 0.0
+  },
+  "BANKBARODA.NS": {
+   "beta": 1.1577421342200773,
+   "idio_vol": 0.013,
+   "start_price": 2699.280559981464,
+   "alpha": 0.0
+  },
+  "PNB.NS": {
+   "beta": 1.3535185030680934,
+   "idio_vol": 0.013,
+   "start_price": 3050.624443986512,
+   "alpha": 0.0
+  },
+  "CANBK.NS": {
+   "beta": 1.1741600962715242,
+   "idio_vol": 0.013,
+   "start_price": 483.2453247059439,
+   "alpha": 0.0
+  },
+  "UNIONBANK.NS": {
+   "beta": 1.317996168250291,
+   "idio_vol": 0.013,
+   "start_price": 3244.629456690379,
+   "alpha": 0.0
+  },
+  "MPHASIS.NS": {
+   "beta": 1.0718742438323563,
+   "idio_vol": 0.016,
+   "start_price": 1999.7148111012561,
+   "alpha": 0.0
+  },
+  "COFORGE.NS": {
+   "beta": 1.2232450269920963,
+   "idio_vol": 0.016,
+   "start_price": 2882.7559075315476,
+   "alpha": 0.0
+  },
+  "PERSISTENT.NS": {
+   "beta": 1.027440996181463,
+   "idio_vol": 0.016,
+   "start_price": 986.8240688301408,
+   "alpha": 0.0
+  },
+  "OIL.NS": {
+   "beta": 1.094419626678739,
+   "idio_vol": 0.016,
+   "start_price": 1286.3821731523449,
+   "alpha": 0.0
+  },
+  "INDIGO.NS": {
+   "beta": 1.3759963395358596,
+   "idio_vol": 0.016,
+   "start_price": 3091.059318219752,
+   "alpha": 0.0
+  },
+  "SPICEJET.NS": {
+   "beta": 0.9534278361648687,
+   "idio_vol": 0.016,
+   "start_price": 2099.3176571471095,
+   "alpha": 0.0
+  },
+  "ZYDUSLIFE.NS": {
+   "beta": 1.0273006650775167,
+   "idio_vol": 0.016,
+   "start_price": 184.14224706766407,
+   "alpha": 0.0
+  },
+  "AUROPHARMA.NS": {
+   "beta": 1.1653028547234672,
+   "idio_vol": 0.016,
+   "start_price": 1179.8877735784313,
+   "alpha": 0.0
+  },
+  "LAURUSLABS.NS": {
+   "beta": 0.5239505772555815,
+   "idio_vol": 0.016,
+   "start_price": 1460.042702400797,
+   "alpha": 0.0
+  },
+  "GRANULES.NS": {
+   "beta": 1.1667557140752578,
+   "idio_vol": 0.016,
+   "start_price": 514.1080233937848,
+   "alpha": 0.0
+  },
+  "WAAREEENER.NS": {
+   "beta": 1.5241047795495897,
+   "idio_vol": 0.016,
+   "start_price": 2135.4450822331337,
+   "alpha": 0.0
+  },
+  "PREMIERENE.NS": {
+   "beta": 1.0111095182112477,
+   "idio_vol": 0.016,
+   "start_price": 1216.4417956277941,
+   "alpha": 0.0
+  },
+  "SUZLON.NS": {
+   "beta": 1.3463342441363901,
+   "idio_vol": 0.016,
+   "start_price": 1397.8267815880677,
+   "alpha": 0.0
+  },
+  "INOXWIND.NS": {
+   "beta": 1.1237989553693046,
+   "idio_vol": 0.016,
+   "start_price": 1352.1266481255632,
+   "alpha": 0.0
+  },
+  "TATAPOWER.NS": {
+   "beta": 0.6609826781265375,
+   "idio_vol": 0.016,
+   "start_price": 2136.7884786456093,
+   "alpha": 0.0
+  },
+  "HAL.NS": {
+   "beta": 1.1281898103917969,
+   "idio_vol": 0.016,
+   "start_price": 2782.249849877763,
+   "alpha": 0.0
+  },
+  "BEL.NS": {
+   "beta": 0.9224481126601185,
+   "idio_vol": 0.016,
+   "start_price": 1657.128208799686,
+   "alpha": 0.0
+  },
+  "BDL.NS": {
+   "beta": 1.0899385833297917,
+   "idio_vol": 0.016,
+   "start_price": 3431.0565686072778,
+   "alpha": 0.0
+  },
+  "MAZDOCK.NS": {
+   "beta": 1.2309423939665132,
+   "idio_vol": 0.016,
+   "start_price": 3253.0930845732164,
+   "alpha": 0.0
+  },
+  "COCHINSHIP.NS": {
+   "beta": 1.2445077141329954,
+   "idio_vol": 0.016,
+   "start_price": 2883.628533526315,
+   "alpha": 0.0
+  },
+  "SCI.NS": {
+   "beta": 1.0405120046242424,
+   "idio_vol": 0.016,
+   "start_price": 231.89080033904526,
+   "alpha": 0.0
+  },
+  "GESHIP.NS": {
+   "beta": 0.9987924239129692,
+   "idio_vol": 0.016,
+   "start_price": 2613.7026153268375,
+   "alpha": 0.0
+  },
+  "CONCOR.NS": {
+   "beta": 1.4224527189421985,
+   "idio_vol": 0.016,
+   "start_price": 2057.718638204443,
+   "alpha": 0.0
+  },
+  "ADANIPORTS.NS": {
+   "beta": 0.9367936153885201,
+   "idio_vol": 0.016,
+   "start_price": 1073.3495031605412,
+   "alpha": 0.0
+  },
+  "TITAN.NS": {
+   "beta": 1.0795823418472343,
+   "idio_vol": 0.016,
+   "start_price": 2293.985235555239,
+   "alpha": 0.0
+  },
+  "KALYANKJIL.NS": {
+   "beta": 0.7892341110734135,
+   "idio_vol": 0.016,
+   "start_price": 1749.3941872841801,
+   "alpha": 0.0
+  },
+  "PCJEWELLER.NS": {
+   "beta": 0.9453585994930548,
+   "idio_vol": 0.016,
+   "start_price": 2717.285911192036,
+   "alpha": 0.0
+  },
+  "KPRMILL.NS": {
+   "beta": 1.1600420332053214,
+   "idio_vol": 0.016,
+   "start_price": 687.0785966680103,
+   "alpha": 0.0
+  },
+  "WELSPUNLIV.NS": {
+   "beta": 1.0950119494778319,
+   "idio_vol": 0.016,
+   "start_price": 3344.6868223962547,
+   "alpha": 0.0
+  },
+  "TRIDENT.NS": {
+   "beta": 0.9901462768723441,
+   "idio_vol": 0.016,
+   "start_price": 595.1081029167644,
+   "alpha": 0.0
+  },
+  "GOKEX.NS": {
+   "beta": 1.2213930692534196,
+   "idio_vol": 0.016,
+   "start_price": 116.08862591587595,
+   "alpha": 0.0
+  },
+  "SRF.NS": {
+   "beta": 1.2639095267912392,
+   "idio_vol": 0.016,
+   "start_price": 2935.284188647634,
+   "alpha": 0.0
+  },
+  "PIIND.NS": {
+   "beta": 1.1912139512226094,
+   "idio_vol": 0.016,
+   "start_price": 822.8937349642184,
+   "alpha": 0.0
+  },
+  "AARTIIND.NS": {
+   "beta": 0.9915638619509476,
+   "idio_vol": 0.016,
+   "start_price": 911.0746622090749,
+   "alpha": 0.0
+  },
+  "NAVINFLUOR.NS": {
+   "beta": 0.9692755600230946,
+   "idio_vol": 0.016,
+   "start_price": 1936.1320336707583,
+   "alpha": 0.0
+  },
+  "DEEPAKNTR.NS": {
+   "beta": 0.9214118166273707,
+   "idio_vol": 0.016,
+   "start_price": 1380.5801695603247,
+   "alpha": 0.0
+  }
+ }
+}

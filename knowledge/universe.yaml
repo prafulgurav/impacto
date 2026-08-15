@@ -1,0 +1,146 @@
+# Impacto — Market Universe
+# Sector indices and representative constituents used for impact mapping and event studies.
+# Tickers use Yahoo Finance suffixes (.NS = NSE) so they work with the default free provider.
+version: 1
+
+benchmark:
+  id: NIFTY_50
+  symbol: "^NSEI"
+  name: NIFTY 50
+
+breadth_benchmark:
+  id: NIFTY_500
+  symbol: "^CRSLDX"
+  name: NIFTY 500
+
+sectors:
+  - id: NIFTY_BANK
+    symbol: "^NSEBANK"
+    name: NIFTY Bank
+    proxies: [HDFCBANK.NS, ICICIBANK.NS, SBIN.NS, AXISBANK.NS, KOTAKBANK.NS]
+    fii_ownership_bucket: high        # sensitivity to foreign flow
+    usd_revenue_share: 0.02
+    imported_input_intensity: 0.05
+
+  - id: NIFTY_IT
+    symbol: "^CNXIT"
+    name: NIFTY IT
+    proxies: [TCS.NS, INFY.NS, HCLTECH.NS, WIPRO.NS, TECHM.NS, LTIM.NS]
+    fii_ownership_bucket: high
+    usd_revenue_share: 0.85           # dominant transmission channel
+    imported_input_intensity: 0.05
+
+  - id: NIFTY_AUTO
+    symbol: "^CNXAUTO"
+    name: NIFTY Auto
+    proxies: [MARUTI.NS, M&M.NS, TATAMOTORS.NS, BAJAJ-AUTO.NS, EICHERMOT.NS]
+    fii_ownership_bucket: medium
+    usd_revenue_share: 0.25
+    imported_input_intensity: 0.30    # steel, chips, rare earths
+
+  - id: NIFTY_ENERGY
+    symbol: "^CNXENERGY"
+    name: NIFTY Energy
+    proxies: [RELIANCE.NS, ONGC.NS, IOC.NS, BPCL.NS, HINDPETRO.NS, NTPC.NS]
+    fii_ownership_bucket: medium
+    usd_revenue_share: 0.35
+    imported_input_intensity: 0.60
+
+  - id: NIFTY_PHARMA
+    symbol: "^CNXPHARMA"
+    name: NIFTY Pharma
+    proxies: [SUNPHARMA.NS, DRREDDY.NS, CIPLA.NS, LUPIN.NS, DIVISLAB.NS]
+    fii_ownership_bucket: medium
+    usd_revenue_share: 0.45           # US generics exposure
+    imported_input_intensity: 0.35    # China API dependence
+
+  - id: NIFTY_METAL
+    symbol: "^CNXMETAL"
+    name: NIFTY Metal
+    proxies: [TATASTEEL.NS, JSWSTEEL.NS, HINDALCO.NS, VEDL.NS, JINDALSTEL.NS]
+    fii_ownership_bucket: medium
+    usd_revenue_share: 0.40
+    imported_input_intensity: 0.45
+
+  - id: NIFTY_FMCG
+    symbol: "^CNXFMCG"
+    name: NIFTY FMCG
+    proxies: [HINDUNILVR.NS, ITC.NS, NESTLEIND.NS, BRITANNIA.NS, DABUR.NS]
+    fii_ownership_bucket: medium
+    usd_revenue_share: 0.08
+    imported_input_intensity: 0.25    # palm oil, crude derivatives
+
+  - id: NIFTY_REALTY
+    symbol: "^CNXREALTY"
+    name: NIFTY Realty
+    proxies: [DLF.NS, GODREJPROP.NS, OBEROIRLTY.NS, PRESTIGE.NS]
+    fii_ownership_bucket: medium
+    usd_revenue_share: 0.0
+    imported_input_intensity: 0.15
+
+  - id: NIFTY_FINSERV
+    symbol: "^CNXFINANCE"
+    name: NIFTY Financial Services
+    proxies: [BAJFINANCE.NS, BAJAJFINSV.NS, HDFCLIFE.NS, SBILIFE.NS, CHOLAFIN.NS]
+    fii_ownership_bucket: high
+    usd_revenue_share: 0.02
+    imported_input_intensity: 0.03
+
+  - id: NIFTY_PSU_BANK
+    symbol: "^CNXPSUBANK"
+    name: NIFTY PSU Bank
+    proxies: [SBIN.NS, BANKBARODA.NS, PNB.NS, CANBK.NS, UNIONBANK.NS]
+    fii_ownership_bucket: low
+    usd_revenue_share: 0.01
+    imported_input_intensity: 0.02
+
+# Thematic baskets that cut across sector indices — used when an event is
+# narrower than a whole sector (e.g. semiconductor export controls).
+baskets:
+  - id: EXPORT_IT_SERVICES
+    name: IT services with >70% US/EU revenue
+    members: [TCS.NS, INFY.NS, HCLTECH.NS, WIPRO.NS, LTIM.NS, MPHASIS.NS, COFORGE.NS, PERSISTENT.NS]
+
+  - id: OMC
+    name: Oil marketing companies
+    members: [IOC.NS, BPCL.NS, HINDPETRO.NS]
+
+  - id: UPSTREAM_OIL
+    name: Upstream oil & gas
+    members: [ONGC.NS, OIL.NS]
+
+  - id: AVIATION
+    name: Aviation
+    members: [INDIGO.NS, SPICEJET.NS]
+
+  - id: US_GENERICS
+    name: US-facing generic pharma
+    members: [SUNPHARMA.NS, DRREDDY.NS, CIPLA.NS, LUPIN.NS, ZYDUSLIFE.NS, AUROPHARMA.NS]
+
+  - id: CHINA_API_DEPENDENT
+    name: Pharma with high China API dependence
+    members: [DIVISLAB.NS, LAURUSLABS.NS, GRANULES.NS]
+
+  - id: SOLAR_RENEWABLE
+    name: Solar / renewables value chain
+    members: [WAAREEENER.NS, PREMIERENE.NS, SUZLON.NS, INOXWIND.NS, TATAPOWER.NS]
+
+  - id: DEFENCE
+    name: Defence & aerospace
+    members: [HAL.NS, BEL.NS, BDL.NS, MAZDOCK.NS, COCHINSHIP.NS]
+
+  - id: SHIPPING_LOGISTICS
+    name: Shipping & logistics
+    members: [SCI.NS, GESHIP.NS, CONCOR.NS, ADANIPORTS.NS]
+
+  - id: GEMS_JEWELLERY
+    name: Gems & jewellery (gold-linked)
+    members: [TITAN.NS, KALYANKJIL.NS, PCJEWELLER.NS]
+
+  - id: TEXTILES_EXPORT
+    name: Textile & apparel exporters
+    members: [KPRMILL.NS, WELSPUNLIV.NS, TRIDENT.NS, GOKEX.NS]
+
+  - id: CHEMICALS
+    name: Specialty chemicals
+    members: [SRF.NS, PIIND.NS, AARTIIND.NS, NAVINFLUOR.NS, DEEPAKNTR.NS]

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22 L13 12 L19 18 L26 8' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<title>Impacto — global events, Indian market impact</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:#fcfcfb; --plane:#f9f9f7;
+    --text-primary:#0b0b0b; --text-secondary:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --pos:#2a78d6; --neg:#e34948; --neutral:#f0efec;
+    --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+    --seq-200:#9ec5f4; --seq-450:#2a78d6; --seq-600:#184f95;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1:#1a1a19; --plane:#0d0d0d;
+      --text-primary:#ffffff; --text-secondary:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+      --pos:#3987e5; --neg:#e66767; --neutral:#383835;
+      --seq-200:#184f95; --seq-450:#3987e5; --seq-600:#9ec5f4;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d;
+    --text-primary:#ffffff; --text-secondary:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+    --pos:#3987e5; --neg:#e66767; --neutral:#383835;
+    --seq-200:#184f95; --seq-450:#3987e5; --seq-600:#9ec5f4;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--plane); color:var(--text-primary);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif; font-size:14px; line-height:1.5;
+  }
+  header {
+    padding:20px 28px; border-bottom:1px solid var(--border);
+    background:var(--surface-1); display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
+  }
+  h1 { font-size:18px; margin:0; font-weight:650; letter-spacing:-0.01em; }
+  .tagline { color:var(--text-secondary); font-size:13px; }
+  .spacer { flex:1; }
+  main { padding:20px 28px 60px; max-width:1320px; margin:0 auto; }
+  .filters {
+    display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
+    padding:14px 16px; background:var(--surface-1);
+    border:1px solid var(--border); border-radius:10px; margin-bottom:18px;
+  }
+  .field { display:flex; flex-direction:column; gap:4px; }
+  .field label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  select, input[type=text], button {
+    font:inherit; padding:7px 10px; border-radius:7px;
+    border:1px solid var(--border); background:var(--surface-1); color:var(--text-primary);
+  }
+  button { cursor:pointer; }
+  button:hover { background:var(--neutral); }
+  .grid { display:grid; gap:16px; }
+  .cards { grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); margin-bottom:18px; }
+  .cards .card:first-child { grid-column:span 2; }
+  @media (max-width:760px){ .cards .card:first-child { grid-column:span 1; } }
+  .panels { grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ .panels { grid-template-columns:1fr; } }
+  .card, .panel {
+    background:var(--surface-1); border:1px solid var(--border);
+    border-radius:10px; padding:16px 18px;
+  }
+  .card .label { font-size:12px; color:var(--text-secondary); }
+  .card .value { font-size:28px; font-weight:650; margin-top:4px; letter-spacing:-0.02em; }
+  .card .sub { font-size:12px; color:var(--muted); margin-top:2px; }
+  .hero { font-size:46px; font-weight:650; letter-spacing:-0.03em; line-height:1.1;
+          white-space:nowrap; margin-top:2px; }
+  .panel h2 { font-size:13px; margin:0 0 2px; font-weight:650;
+              text-transform:uppercase; letter-spacing:.06em; color:var(--text-secondary); }
+  .panel .sub { font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .legend { display:flex; gap:16px; flex-wrap:wrap; font-size:12px;
+            color:var(--text-secondary); margin-bottom:10px; }
+  .legend span { display:inline-flex; align-items:center; gap:6px; }
+  .swatch { width:10px; height:10px; border-radius:3px; display:inline-block; }
+  table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  th { text-align:left; font-weight:600; color:var(--muted); font-size:11px;
+       text-transform:uppercase; letter-spacing:.05em; padding:6px 8px;
+       border-bottom:1px solid var(--grid); }
+  td { padding:6px 8px; border-bottom:1px solid var(--grid); vertical-align:top; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .badge { display:inline-block; padding:1px 7px; border-radius:20px; font-size:11px;
+           border:1px solid var(--border); color:var(--text-secondary); }
+  .badge.high { border-color:var(--good); color:var(--good); }
+  .badge.medium { border-color:var(--warning); }
+  .badge.low { border-color:var(--muted); }
+  details { margin-top:12px; }
+  summary { cursor:pointer; font-size:12px; color:var(--text-secondary); }
+  .tip {
+    position:fixed; pointer-events:none; opacity:0; transition:opacity .1s;
+    background:var(--surface-1); border:1px solid var(--border); border-radius:8px;
+    padding:8px 10px; font-size:12px; box-shadow:0 4px 16px rgba(0,0,0,.14);
+    max-width:300px; z-index:50;
+  }
+  .rationale { color:var(--text-secondary); font-size:12px; }
+  .disclaimer {
+    margin-top:24px; padding:14px 16px; border-radius:10px;
+    background:var(--surface-1); border:1px solid var(--border);
+    font-size:12px; color:var(--text-secondary);
+  }
+  .answer { white-space:pre-wrap; font-size:13.5px; }
+  .err { color:var(--critical); font-size:13px; }
+  .loading { color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Impacto</h1>
+  <span class="tagline">Global events and policy decisions, mapped to Indian market impact — with the historical evidence attached.</span>
+  <span class="spacer"></span>
+  <button id="theme">Theme</button>
+</header>
+
+<main>
+  <div class="filters">
+    <div class="field">
+      <label for="arch">Event archetype</label>
+      <select id="arch"></select>
+    </div>
+    <div class="field">
+      <label for="target">Target</label>
+      <select id="target"></select>
+    </div>
+    <div class="field">
+      <label for="window">Event window</label>
+      <select id="window">
+        <option>T+0</option><option>T+0..T+3</option>
+        <option selected>T+1..T+5</option><option>T+0..T+10</option><option>T+1..T+21</option>
+      </select>
+    </div>
+    <div class="field spacer" style="min-width:260px;">
+      <label for="q">Ask why a sector moved</label>
+      <input type="text" id="q" placeholder="Why did IT stocks move?" style="width:100%">
+    </div>
+    <button id="ask">Explain</button>
+  </div>
+
+  <div class="grid cards" id="tiles"></div>
+
+  <div class="grid panels">
+    <div class="panel">
+      <h2>Sector impact map</h2>
+      <div class="sub" id="impact-sub">Encoded transmission-map priors for this archetype, ranked by conviction.</div>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--pos)"></i>Historically positive</span>
+        <span><i class="swatch" style="background:var(--neg)"></i>Historically negative</span>
+        <span><i class="swatch" style="background:var(--neutral);border:1px solid var(--baseline)"></i>Two-sided / ambiguous</span>
+        <span><i class="swatch" style="background:var(--text-primary);border-radius:50%;width:9px;height:9px"></i>Realised median (may contradict the prior)</span>
+      </div>
+      <div id="impact"></div>
+      <details><summary>Table view</summary><div id="impact-table"></div></details>
+    </div>
+
+    <div class="panel">
+      <h2>Distribution of past outcomes</h2>
+      <div class="sub" id="dist-sub"></div>
+      <div id="dist"></div>
+      <details><summary>Table view — every analog event</summary><div id="analog-table"></div></details>
+    </div>
+  </div>
+
+  <div class="grid panels" style="margin-top:16px;">
+    <div class="panel">
+      <h2>Explanation</h2>
+      <div class="sub">Composed from retrieved events, transmission rules and measured event studies. Every claim is cited.</div>
+      <div class="answer" id="answer">Loading…</div>
+      <div id="citations"></div>
+    </div>
+    <div class="panel">
+      <h2>Latest digest</h2>
+      <div class="sub" id="digest-sub"></div>
+      <div id="digest"></div>
+    </div>
+  </div>
+
+  <div class="disclaimer" id="disclaimer"></div>
+</main>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const tip = $("tip");
+const fmtBps = (v) => (v >= 0 ? "+" : "") + Math.round(v) + " bps";
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function showTip(evt, html) {
+  tip.innerHTML = html; tip.style.opacity = "1";
+  const pad = 14;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  if (x + 310 > window.innerWidth) x = evt.clientX - 310;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+const hideTip = () => tip.style.opacity = "0";
+
+$("theme").onclick = () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+  refresh();
+};
+
+async function api(path, params) {
+  const url = new URL(path, location.origin);
+  Object.entries(params || {}).forEach(([k, v]) => v != null && url.searchParams.set(k, v));
+  const r = await fetch(url);
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+  return r.json();
+}
+
+/* ---------------------------------------------------------- diverging bars */
+function renderImpactBars(el, rows) {
+  if (!rows.length) { el.innerHTML = '<p class="loading">No impact rules.</p>'; return; }
+  const W = 560, rowH = 34, padL = 168, padR = 74;
+  const H = rows.length * rowH + 26;
+  const maxAbs = Math.max(...rows.map(r => Math.max(Math.abs(r.magnitude_prior_bps[0]),
+                                                    Math.abs(r.magnitude_prior_bps[1]))), 100);
+  const mid = padL + (W - padL - padR) / 2;
+  const scale = (v) => mid + (v / maxAbs) * ((W - padL - padR) / 2);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img"
+    aria-label="Signed sector impact by encoded prior">`;
+  // zero baseline
+  svg += `<line x1="${mid}" y1="14" x2="${mid}" y2="${H - 10}" stroke="var(--baseline)" stroke-width="1"/>`;
+  svg += `<text x="${mid}" y="10" text-anchor="middle" font-size="10" fill="var(--muted)">0</text>`;
+
+  rows.forEach((r, i) => {
+    const y = 22 + i * rowH;
+    const [lo, hi] = r.magnitude_prior_bps;
+    const x0 = scale(Math.min(lo, hi)), x1 = scale(Math.max(lo, hi));
+    const colour = r.direction > 0 ? "var(--pos)" : r.direction < 0 ? "var(--neg)" : "var(--neutral)";
+    const stroke = r.direction === 0 ? ' stroke="var(--baseline)" stroke-width="1"' : "";
+    // prior range band (max 18px thick, 4px rounded ends)
+    svg += `<rect class="bar" data-i="${i}" x="${x0}" y="${y}" width="${Math.max(x1 - x0, 3)}"
+              height="18" rx="4" fill="${colour}"${stroke}/>`;
+    // realised median marker, 2px surface ring
+    if (r.historical_median_car_bps != null) {
+      const mx = Math.min(Math.max(scale(r.historical_median_car_bps), padL), W - padR);
+      svg += `<circle cx="${mx}" cy="${y + 9}" r="4.5" fill="var(--text-primary)"
+                stroke="var(--surface-1)" stroke-width="2"/>`;
+    }
+    svg += `<text x="${padL - 10}" y="${y + 13}" text-anchor="end" font-size="12"
+              fill="var(--text-primary)">${esc(r.name)}</text>`;
+    const lbl = r.historical_median_car_bps != null ? fmtBps(r.historical_median_car_bps) : "no data";
+    svg += `<text x="${W - padR + 8}" y="${y + 13}" font-size="11.5"
+              fill="var(--text-secondary)" font-variant-numeric="tabular-nums">${lbl}</text>`;
+  });
+  svg += `</svg>`;
+  el.innerHTML = svg + `<p style="font-size:11.5px;color:var(--muted);margin:6px 0 0">
+    Bar = magnitude range encoded in the transmission map. Dot = median realised
+    abnormal return measured across past occurrences.</p>`;
+
+  el.querySelectorAll(".bar").forEach(node => {
+    node.style.cursor = "pointer";
+    node.addEventListener("mousemove", (e) => {
+      const r = rows[+node.dataset.i];
+      const hist = r.sample_size
+        ? `Realised median <b>${fmtBps(r.historical_median_car_bps)}</b> across
+           <b>${r.sample_size}</b> past occurrences (hit rate ${(r.historical_hit_rate * 100).toFixed(0)}%).`
+        : "No historical sample yet.";
+      showTip(e, `<b>${esc(r.name)}</b><br>
+        Prior ${r.magnitude_prior_bps[0]} to ${r.magnitude_prior_bps[1]} bps over ${esc(r.horizon)},
+        ${esc(r.confidence)} confidence.<br>${hist}<br>
+        <span style="color:var(--muted)">Channels: ${esc(r.channels.join(", "))}</span><br>
+        <span style="color:var(--text-secondary)">${esc(r.rationale)}</span>`);
+    });
+    node.addEventListener("mouseleave", hideTip);
+  });
+}
+
+/* ------------------------------------------------------------- histogram */
+function renderDistribution(el, summary) {
+  if (!summary || !summary.analogs.length) {
+    el.innerHTML = '<p class="loading">No historical sample for this pair.</p>'; return;
+  }
+  const vals = summary.analogs.map(a => a.car_bps);
+  const W = 560, H = 210, padL = 42, padR = 14, padT = 14, padB = 32;
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const span = (hi - lo) || 1;
+  const nBins = Math.min(14, Math.max(6, Math.round(Math.sqrt(vals.length) * 1.8)));
+  const bw = span / nBins;
+  const bins = Array.from({length: nBins}, (_, i) => ({ lo: lo + i * bw, hi: lo + (i + 1) * bw, n: 0 }));
+  vals.forEach(v => { bins[Math.min(nBins - 1, Math.floor((v - lo) / bw))].n++; });
+  const maxN = Math.max(...bins.map(b => b.n));
+  const x = (v) => padL + ((v - lo) / span) * (W - padL - padR);
+  const y = (n) => H - padB - (n / maxN) * (H - padT - padB);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img"
+    aria-label="Distribution of historical cumulative abnormal returns">`;
+  for (let g = 0; g <= maxN; g += Math.max(1, Math.ceil(maxN / 4))) {
+    svg += `<line x1="${padL}" y1="${y(g)}" x2="${W - padR}" y2="${y(g)}"
+              stroke="var(--grid)" stroke-width="1"/>
+            <text x="${padL - 8}" y="${y(g) + 4}" text-anchor="end" font-size="10"
+              fill="var(--muted)" font-variant-numeric="tabular-nums">${g}</text>`;
+  }
+  const slotW = (W - padL - padR) / nBins;
+  bins.forEach((b, i) => {
+    if (!b.n) return;
+    const bx = padL + i * slotW + 1;        // 2px surface gap between adjacent bars
+    const bwid = Math.max(slotW - 2, 2);
+    const centre = (b.lo + b.hi) / 2;
+    const colour = centre >= 0 ? "var(--pos)" : "var(--neg)";
+    svg += `<rect class="hb" data-i="${i}" x="${bx}" y="${y(b.n)}" width="${bwid}"
+              height="${H - padB - y(b.n)}" rx="4" fill="${colour}"/>`;
+  });
+  // zero reference
+  if (lo < 0 && hi > 0) {
+    svg += `<line x1="${x(0)}" y1="${padT}" x2="${x(0)}" y2="${H - padB}"
+              stroke="var(--baseline)" stroke-width="1"/>
+            <text x="${x(0)}" y="${H - padB + 22}" text-anchor="middle" font-size="10"
+              fill="var(--muted)">0</text>`;
+  }
+  // median marker with surface ring
+  const mx = x(summary.median_car_bps);
+  svg += `<line x1="${mx}" y1="${padT}" x2="${mx}" y2="${H - padB}"
+            stroke="var(--text-primary)" stroke-width="2"/>
+          <circle cx="${mx}" cy="${padT}" r="4.5" fill="var(--text-primary)"
+            stroke="var(--surface-1)" stroke-width="2"/>`;
+  svg += `<line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}"
+            stroke="var(--baseline)" stroke-width="1"/>`;
+  svg += `<text x="${padL}" y="${H - padB + 22}" font-size="10" fill="var(--muted)"
+            font-variant-numeric="tabular-nums">${Math.round(lo)}</text>
+          <text x="${W - padR}" y="${H - padB + 22}" text-anchor="end" font-size="10"
+            fill="var(--muted)" font-variant-numeric="tabular-nums">${Math.round(hi)}</text>`;
+  svg += `</svg>`;
+  el.innerHTML = svg + `<p style="font-size:11.5px;color:var(--muted);margin:6px 0 0">
+    Cumulative abnormal return (bps) per past occurrence; bars left of zero are negative outcomes, right are positive. Vertical rule marks the median.</p>`;
+
+  el.querySelectorAll(".hb").forEach(node => {
+    node.addEventListener("mousemove", (e) => {
+      const b = bins[+node.dataset.i];
+      showTip(e, `<b>${b.n} occurrence${b.n > 1 ? "s" : ""}</b><br>
+        ${Math.round(b.lo)} to ${Math.round(b.hi)} bps`);
+    });
+    node.addEventListener("mouseleave", hideTip);
+  });
+}
+
+/* -------------------------------------------------------------- rendering */
+let ARCHETYPES = [], KB = null;
+
+function tile(label, value, sub) {
+  return `<div class="card"><div class="label">${label}</div>
+          <div class="value">${value}</div><div class="sub">${sub || ""}</div></div>`;
+}
+
+async function refresh() {
+  const archId = $("arch").value, target = $("target").value, window_ = $("window").value;
+  const impactEl = $("impact"), distEl = $("dist");
+  impactEl.innerHTML = '<p class="loading">Loading…</p>';
+  distEl.innerHTML = '<p class="loading">Loading…</p>';
+
+  const detail = await api(`/knowledge/archetypes/${archId}`);
+  $("impact-sub").textContent = detail.description;
+
+  // score each impact rule against history
+  const rows = [];
+  for (const imp of detail.impacts) {
+    let s = null;
+    try { s = await api("/analogs", { archetype_id: archId, target: imp.target, window: window_ }); }
+    catch (e) { /* no sample */ }
+    rows.push({
+      ...imp,
+      name: imp.target.replace(/_/g, " "),
+      historical_median_car_bps: s ? s.median_car_bps : null,
+      historical_hit_rate: s ? s.hit_rate : null,
+      sample_size: s ? s.sample_size : 0,
+    });
+  }
+  rows.sort((a, b) => Math.abs(b.historical_median_car_bps ?? 0) - Math.abs(a.historical_median_car_bps ?? 0));
+  renderImpactBars(impactEl, rows);
+
+  $("impact-table").innerHTML = `<table><thead><tr><th>Target</th><th>Dir</th>
+    <th>Conf</th><th class="num">Prior (bps)</th><th class="num">Realised median</th>
+    <th class="num">n</th><th>Channels</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td>${esc(r.name)}</td>
+      <td>${r.direction > 0 ? "positive" : r.direction < 0 ? "negative" : "two-sided"}</td>
+      <td><span class="badge ${r.confidence}">${r.confidence}</span></td>
+      <td class="num">${r.magnitude_prior_bps[0]} to ${r.magnitude_prior_bps[1]}</td>
+      <td class="num">${r.historical_median_car_bps != null ? fmtBps(r.historical_median_car_bps) : "—"}</td>
+      <td class="num">${r.sample_size}</td>
+      <td class="rationale">${esc(r.channels.join(", "))}</td></tr>`).join("") +
+    `</tbody></table>`;
+
+  // distribution for the selected target
+  let summary = null;
+  try { summary = await api("/analogs", { archetype_id: archId, target, window: window_ }); }
+  catch (e) { distEl.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+  $("dist-sub").textContent = summary
+    ? `${target.replace(/_/g, " ")} across ${summary.sample_size} past occurrences of ${detail.label}, ${window_} window.`
+    : "No historical sample for this pair.";
+  if (summary) renderDistribution(distEl, summary);
+
+  $("tiles").innerHTML = summary ? [
+    `<div class="card"><div class="label">Median abnormal return</div>
+      <div class="hero" style="color:${summary.median_car_bps >= 0 ? "var(--pos)" : "var(--neg)"}">
+      ${fmtBps(summary.median_car_bps)}</div>
+      <div class="sub">${target.replace(/_/g, " ")}, ${window_}</div></div>`,
+    tile("Sample size", summary.sample_size, "past occurrences"),
+    tile("Hit rate vs prior", (summary.hit_rate * 100).toFixed(0) + "%", "share matching encoded direction"),
+    tile("p-value", summary.p_value.toFixed(3),
+         summary.p_value < 0.05 ? "significant at 5%" : "not distinguishable from noise"),
+    tile("5th–95th pct", `${Math.round(summary.p5_bps)} / ${Math.round(summary.p95_bps)}`, "bps range"),
+  ].join("") : "";
+
+  $("analog-table").innerHTML = summary ? `<table><thead><tr><th>Date</th>
+    <th class="num">CAR</th><th>Headline</th></tr></thead><tbody>` +
+    summary.analogs.map(a => `<tr><td>${a.event_date}</td>
+      <td class="num" style="color:${a.car_bps >= 0 ? "var(--pos)" : "var(--neg)"}">${fmtBps(a.car_bps)}</td>
+      <td class="rationale">${esc(a.headline)}</td></tr>`).join("") + "</tbody></table>" : "";
+}
+
+async function loadDigest() {
+  const d = await api("/digest", { lookback_days: 10 });
+  $("digest-sub").textContent = `${d.digest_date} — ${d.headline_summary}`;
+  $("digest").innerHTML = d.sections.map(s =>
+    `<div style="margin-bottom:12px"><div style="font-weight:600;font-size:12.5px">${esc(s.title)}</div>
+     <ul style="margin:4px 0 0;padding-left:18px;color:var(--text-secondary);font-size:12.5px">
+     ${s.bullets.map(b => `<li>${esc(b)}</li>`).join("")}</ul></div>`).join("");
+  $("disclaimer").textContent = d.disclaimer;
+}
+
+async function ask() {
+  const q = $("q").value.trim(); if (!q) return;
+  $("answer").textContent = "Thinking…";
+  const ex = await api("/explain", { q });
+  $("answer").textContent = ex.answer;
+  $("citations").innerHTML = ex.citations.length
+    ? `<details open><summary>Sources (${ex.citations.length})</summary>
+       <table><tbody>${ex.citations.map(c =>
+       `<tr><td class="rationale">[${esc(c.kind)}]</td><td>${esc(c.label)}</td>
+        <td class="rationale">${esc(c.detail)}</td></tr>`).join("")}</tbody></table></details>`
+    : "";
+}
+
+(async function init() {
+  ARCHETYPES = await api("/knowledge/archetypes");
+  $("arch").innerHTML = ARCHETYPES.map(a =>
+    `<option value="${a.id}">${esc(a.label)}</option>`).join("");
+  const health = await api("/health");
+  const setTargets = () => {
+    const a = ARCHETYPES.find(x => x.id === $("arch").value);
+    $("target").innerHTML = a.targets.map(t =>
+      `<option value="${t}">${esc(t.replace(/_/g, " "))}</option>`).join("");
+  };
+  setTargets();
+  $("arch").onchange = () => { setTargets(); refresh(); };
+  $("target").onchange = refresh;
+  $("window").onchange = refresh;
+  $("ask").onclick = ask;
+  $("q").addEventListener("keydown", e => { if (e.key === "Enter") ask(); });
+  await refresh();
+  await loadDigest();
+  // seed the explainer so the panel is never an empty column on first paint
+  $("q").value = "Why did the market move?";
+  await ask();
+  $("q").value = "";
+})();
+</script>
+</body>
+</html>

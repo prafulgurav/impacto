@@ -1,0 +1,11 @@
+services:
+  impacto:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      GP_MARKET_PROVIDER: ${GP_MARKET_PROVIDER:-fixture}
+      GP_LLM_PROVIDER: ${GP_LLM_PROVIDER:-none}
+      GP_ANTHROPIC_API_KEY: ${GP_ANTHROPIC_API_KEY:-}
+      GP_FRED_API_KEY: ${GP_FRED_API_KEY:-}
+      GP_COMPLIANCE_MODE: "true"
+    restart: unless-stopped
