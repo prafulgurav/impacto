@@ -207,10 +207,26 @@ export async function resolve(id: number): Promise<void> {
   await db().outbox.delete(id);
 }
 
-export async function recordFailure(id: number, error: string): Promise<void> {
+/**
+ * Note a failed replay.
+ *
+ * `countsAsAttempt: false` records what went wrong without consuming a retry.
+ * That is the right treatment for a request that never reached the server: it
+ * tells us nothing about whether the edit is acceptable, and counting it would
+ * push a perfectly good edit down an exponential wait for the sole reason that
+ * the user was somewhere with no signal.
+ */
+export async function recordFailure(
+  id: number,
+  error: string,
+  { countsAsAttempt = true }: { countsAsAttempt?: boolean } = {},
+): Promise<void> {
   const entry = await db().outbox.get(id);
   if (!entry) return;
-  await db().outbox.update(id, { attempts: entry.attempts + 1, lastError: error });
+  await db().outbox.update(id, {
+    attempts: countsAsAttempt ? entry.attempts + 1 : entry.attempts,
+    lastError: error,
+  });
 }
 
 /** Exponential backoff, capped so a long outage does not push retries to hours. */

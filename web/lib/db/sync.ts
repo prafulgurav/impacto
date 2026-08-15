@@ -88,6 +88,20 @@ export interface FlushResult {
   remaining: number;
 }
 
+export interface FlushOptions {
+  /**
+   * Retry every entry now, however recently it failed.
+   *
+   * Backoff exists to stop us hammering a server that is refusing work. An
+   * offline stretch is the opposite situation: those attempts never reached a
+   * server at all, and each one still pushed the entry further down an
+   * exponential wait. Left alone, a user who queues an edit on a train has it
+   * sit unsent for minutes after the signal returns, which is exactly when they
+   * expect it to go. Reconnecting is new information, so it clears the wait.
+   */
+  ignoreBackoff?: boolean;
+}
+
 /**
  * Replay queued mutations.
  *
@@ -95,7 +109,7 @@ export interface FlushResult {
  * malformed symbol, a weight over 100%. Retrying it forever would wedge the
  * outbox behind an entry that can never succeed, so it is dropped.
  */
-export async function flushOutbox(): Promise<FlushResult> {
+export async function flushOutbox(options: FlushOptions = {}): Promise<FlushResult> {
   const entries = await pending();
   let flushed = 0;
   let failed = 0;
@@ -105,7 +119,7 @@ export async function flushOutbox(): Promise<FlushResult> {
 
     const waitFor = backoffMs(entry.attempts);
     const since = Date.now() - new Date(entry.updatedAt).getTime();
-    if (entry.attempts > 0 && since < waitFor) continue;
+    if (!options.ignoreBackoff && entry.attempts > 0 && since < waitFor) continue;
 
     try {
       await replay(entry);
@@ -119,6 +133,11 @@ export async function flushOutbox(): Promise<FlushResult> {
         error.status !== 401 &&
         error.status !== 429;
 
+      // status 0 is the client's marker for a request that never got a
+      // response. The edit was never judged, so the attempt should not be
+      // held against it.
+      const neverReachedServer = error instanceof ApiError && error.status === 0;
+
       if (permanent) {
         await resolve(entry.id);
         failed += 1;
@@ -126,6 +145,7 @@ export async function flushOutbox(): Promise<FlushResult> {
         await recordFailure(
           entry.id,
           error instanceof Error ? error.message : 'replay failed',
+          { countsAsAttempt: !neverReachedServer },
         );
         failed += 1;
       }
@@ -162,7 +182,8 @@ export async function requestBackgroundSync(): Promise<boolean> {
 export function startSync(): () => void {
   const onOnline = () => {
     void syncBundle();
-    void flushOutbox();
+    // Connectivity returning is the one moment a queued edit should not wait.
+    void flushOutbox({ ignoreBackoff: true });
   };
 
   void syncBundle();

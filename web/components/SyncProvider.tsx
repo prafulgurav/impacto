@@ -32,10 +32,12 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
       teardown = startSync();
 
       // The service worker asks the page to replay the outbox, because the
-      // queue lives in the page's Dexie instance.
+      // queue lives in the page's Dexie instance. It only asks when Background
+      // Sync fires, which means connectivity has just returned — so, as on the
+      // `online` event, the accumulated backoff no longer applies.
       navigator.serviceWorker?.addEventListener('message', (event) => {
         if ((event.data as { type?: string })?.type === 'flush-outbox') {
-          void flushOutbox();
+          void flushOutbox({ ignoreBackoff: true });
         }
       });
     });
