@@ -56,11 +56,9 @@ services:
       # every user gets notified twice.
       IMPACTO_SCHEDULER_ENABLED: ${IMPACTO_SCHEDULER_ENABLED:-true}
       IMPACTO_COMPLIANCE_MODE: "true"
-    # Migrations run on start rather than at build time, so the image is
-    # environment-agnostic and a rollback does not need a rebuild.
-    command: >
-      sh -c "alembic upgrade head &&
-             uvicorn impacto.api:app --host 0.0.0.0 --port 8000"
+    # No command override: the image's entrypoint already runs the migrations
+    # before starting uvicorn, so compose and a real host behave identically.
+    # Overriding it here is how the two drifted apart in the first place.
     restart: unless-stopped
 
 volumes:

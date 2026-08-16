@@ -28,6 +28,7 @@ still honoured as a fallback, so an existing deployment keeps working.
 |---|---|---|
 | `IMPACTO_REDIS_URL` | — | Shared response cache and rate-limit counters. Without it each replica keeps its own in-process counters, so N replicas allow N times the intended limit. |
 | `IMPACTO_SCHEDULER_ENABLED` | `false` | **Exactly one instance may set this true.** Two schedulers means every user is notified twice. |
+| `IMPACTO_RUN_MIGRATIONS` | `true` | The container runs `alembic upgrade head` before starting uvicorn. Set false on every replica beyond the first: two containers racing the same upgrade is the same mistake as two schedulers. |
 | `IMPACTO_COOKIE_SECURE` | `true` | Only set false for plain-HTTP local development. It also enables the magic-link debug token, which must never be on in production. |
 
 ### Narration
@@ -58,7 +59,9 @@ still honoured as a fallback, so an existing deployment keeps working.
 ## Order of operations
 
 1. Provision Postgres and Redis.
-2. `alembic upgrade head` — the container does this on start.
+2. `alembic upgrade head` — the image's entrypoint does this on start, so a
+   plain `docker run` of the published image is enough; there is no separate
+   migration step and no command to override.
 3. Start the API with `IMPACTO_SCHEDULER_ENABLED=true` on **one** instance.
 4. Let the nightly precompute run once, or trigger it manually. Until it has,
    `/analogs` falls back to computing on request, which is correct but slow.
