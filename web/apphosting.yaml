@@ -1,0 +1,42 @@
+# Firebase App Hosting configuration for the web tier.
+#
+# App Hosting, not plain Firebase Hosting: this app uses ISR and a runtime
+# rewrite that proxies /api to the Cloud Run service, so it needs a Node server.
+# Static Hosting would serve the shell and 404 every data request.
+#
+# Every variable below is needed at BUILD as well as RUNTIME. The explore routes
+# are statically generated and revalidated on a 24-hour ISR window, so the build
+# itself calls the API — a build with no API_ORIGIN produces pages that render
+# their no-sample state rather than failing, which is worse than failing.
+
+runConfig:
+  # The PWA shell is cheap to serve and the work happens in the API tier.
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+
+env:
+  # Read directly by the statically generated routes and by ISR revalidation.
+  - variable: API_ORIGIN
+    value: https://REPLACE-WITH-CLOUD-RUN-URL
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Proxy target for /api/* at runtime. Same value; kept separate because the
+  # service worker's caching rules are written against same-origin paths, so the
+  # browser must never talk to the API's origin directly.
+  - variable: NEXT_PUBLIC_API_ORIGIN
+    value: https://REPLACE-WITH-CLOUD-RUN-URL
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Canonical origin for sitemap.xml, robots.txt and llms.txt.
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://REPLACE-WITH-APP-HOSTING-URL
+    availability:
+      - BUILD
+      - RUNTIME

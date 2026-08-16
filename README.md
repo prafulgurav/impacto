@@ -114,6 +114,7 @@ tests/                pytest
 |---|---|
 | `docs/PWA-BUILD-BRIEF.md` | The build brief this was implemented from |
 | `docs/DEPLOYMENT.md` | Deploying the web and API tiers, every env var |
+| `docs/DEPLOYMENT-FIREBASE.md` | Step-by-step runbook for Firebase App Hosting + Cloud Run + Cloud SQL |
 | `web/BUDGETS.md` | Measured performance budgets and one the brief could not meet |
 | `COMPLIANCE.md` | The full control set behind the SEBI position |
 | `ARCHITECTURE.md` | How the engine is put together |
