@@ -16,4 +16,11 @@ else
   echo "impacto: IMPACTO_RUN_MIGRATIONS=false, skipping migrations"
 fi
 
+# Cloud Run, App Engine and Heroku all inject the port to listen on rather than
+# letting the image pick one. Honouring it here means the same image runs
+# unmodified on those and on plain Docker, where 8000 is the default.
+if [ $# -eq 0 ]; then
+  exec uvicorn impacto.api:app --host 0.0.0.0 --port "${PORT:-8000}"
+fi
+
 exec "$@"

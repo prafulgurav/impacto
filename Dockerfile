@@ -20,9 +20,12 @@ RUN pip install --no-cache-dir -e .
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
 
+ENV PORT=8000
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
-  CMD python -c "import httpx,sys; sys.exit(0 if httpx.get('http://127.0.0.1:8000/health').status_code==200 else 1)"
+  CMD python -c "import httpx,os,sys; sys.exit(0 if httpx.get(f\"http://127.0.0.1:{os.environ.get('PORT','8000')}/health\").status_code==200 else 1)"
 
+# No CMD: the entrypoint starts uvicorn on $PORT when given no arguments, so the
+# image runs unchanged on Cloud Run and friends, which choose the port for you.
+# Pass a command to override (the compose file passes none).
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["uvicorn", "impacto.api:app", "--host", "0.0.0.0", "--port", "8000"]
