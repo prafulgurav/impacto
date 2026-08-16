@@ -1,0 +1,115 @@
+{
+  "_comment": "Shared compliance fixture, read by BOTH pytest (tests/test_guardrails.py) and vitest (web/tests/unit/compliance.test.ts). Two implementations of the same regexes will drift apart unless one fixture judges them both. Add a case here first, then make both sides pass it.",
+  "blocked": [
+    {
+      "text": "Buy IT stocks now.",
+      "why": "sentence-initial imperative to transact"
+    },
+    {
+      "text": "Investors should sell NIFTY Bank before the meeting.",
+      "why": "recommendation framing around a trade verb"
+    },
+    {
+      "text": "We recommend accumulating metals on this dip.",
+      "why": "explicit recommendation verb"
+    },
+    {
+      "text": "Our advice is to exit pharma.",
+      "why": "advice framing"
+    },
+    {
+      "text": "Infosys will fall over the next week.",
+      "why": "forward-looking directional claim about a named security"
+    },
+    {
+      "text": "Expect NIFTY IT to drop after this.",
+      "why": "forecast verb plus direction"
+    },
+    {
+      "text": "The stock is going to rise from here.",
+      "why": "going-to construction with direction"
+    },
+    {
+      "text": "Price target of Rs 1,450 on this name.",
+      "why": "price target"
+    },
+    {
+      "text": "There is downside of 12% from current levels.",
+      "why": "quantified forward-looking downside"
+    },
+    {
+      "text": "This trade offers guaranteed returns.",
+      "why": "guaranteed returns"
+    },
+    {
+      "text": "A multibagger in the making.",
+      "why": "hype language"
+    },
+    {
+      "text": "Time to buy the dip in IT.",
+      "why": "time-to-transact framing"
+    },
+    {
+      "text": "Go long on the rupee here.",
+      "why": "position instruction"
+    },
+    {
+      "text": "Strong buy rating on this sector.",
+      "why": "analyst rating language"
+    },
+    {
+      "text": "Book profits in metals now.",
+      "why": "sentence-initial imperative to transact"
+    }
+  ],
+  "allowed": [
+    {
+      "text": "NIFTY IT's median 5-day abnormal return across 12 past H-1B tightening events was -180 bps.",
+      "why": "a measured historical statistic with its sample size"
+    },
+    {
+      "text": "Historically, across 33 past occurrences, the median cumulative abnormal return was +40 bps (p = 0.77).",
+      "why": "historical, carries n and p"
+    },
+    {
+      "text": "A weaker rupee raises the rupee value of dollar-denominated revenue.",
+      "why": "describes a transmission mechanism"
+    },
+    {
+      "text": "Low foreign ownership means there is little left to sell in a broad outflow.",
+      "why": "the word sell appears, but not as an instruction; a naive blocklist would wrongly flag this"
+    },
+    {
+      "text": "That distribution is not statistically distinguishable from zero, so treat this linkage as weak evidence.",
+      "why": "states uncertainty plainly"
+    },
+    {
+      "text": "The transmission map records this linkage as two-sided; the mechanism can transmit in either direction.",
+      "why": "preserves ambiguity rather than resolving it"
+    },
+    {
+      "text": "Across the sample the realised hit rate was 66%.",
+      "why": "realised historical measure"
+    },
+    {
+      "text": "NIFTY IT has historically fallen after this archetype was detected.",
+      "why": "explicitly historical, so the forecast check must exempt it"
+    },
+    {
+      "text": "The observed median move was negative in 8 of 12 past occurrences.",
+      "why": "observation, not prediction"
+    },
+    {
+      "text": "Impacto presents historical statistics and economic mechanisms for information and education only.",
+      "why": "the disclaimer itself must pass"
+    },
+    {
+      "text": "Consult a SEBI-registered investment adviser before making any investment decision.",
+      "why": "the required pointer must pass; it contains advice words but is not a recommendation"
+    },
+    {
+      "text": "Where your holdings sit relative to the sectors these archetypes have historically moved.",
+      "why": "portfolio copy describes exposure, never action"
+    }
+  ]
+}

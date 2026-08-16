@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+openapi.json
+playwright-report
+test-results
+*.tsbuildinfo
+next-env.d.ts

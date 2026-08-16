@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  # base64 of exactly 32 bytes. The holdings columns fail closed on a key of any
+  # other length, which is the intended behaviour — the previous value here was
+  # 35 bytes and CI correctly refused to store anything with it.
+  IMPACTO_HOLDINGS_ENCRYPTION_KEY: aW1wYWN0by1jaS10ZXN0LWtleS1ub3QtYS1zZWNyZXQ=
+  IMPACTO_JWT_SECRET: ci-secret-not-used-in-any-deployment
+
+jobs:
+  python:
+    name: Python — tests, lint, migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -e ".[dev,cache]"
+
+      - name: Migrations run clean on an empty database
+        run: |
+          IMPACTO_DATABASE_URL="sqlite:///$PWD/ci.db" alembic upgrade head
+        # The acceptance criterion for Phase 1, and the thing that breaks a
+        # deploy if the models drift from the migrations.
+
+      - run: ruff check src tests scripts migrations
+      - run: python -m pytest tests -q -m "not slow"
+
+      - name: Acceptance checks (full precompute sweep)
+        run: python -m pytest tests -q -m slow
+
+  web:
+    name: Web — types, lint, unit, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generated API types are in step with the API
+        run: |
+          pip install -e "../[dev]"
+          IMPACTO_DATABASE_URL="sqlite:///$PWD/types.db" \
+            python -c "
+          import json, sys; sys.path.insert(0, '../src')
+          from fastapi.testclient import TestClient
+          from impacto.api.app import create_app
+          open('openapi.json','w').write(json.dumps(TestClient(create_app()).get('/openapi.json').json()))
+          "
+          pnpm exec openapi-typescript ./openapi.json -o types/api.d.ts
+          # A backend shape change has to break the build here, not at runtime
+          # in a user's hand.
+          git diff --exit-code types/api.d.ts
+
+      - run: pnpm typecheck
+      - name: Unit tests, including the build-blocking compliance scan
+        run: pnpm test
+      - run: pnpm build
+        env:
+          SERWIST_SUPPRESS_TURBOPACK_WARNING: '1'
+
+  e2e:
+    name: Web — E2E, offline and accessibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - uses: pnpm/action-setup@v4
+        with: { version: 11 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - run: pip install -e ".[dev]"
+      - run: IMPACTO_DATABASE_URL="sqlite:///$PWD/e2e.db" alembic upgrade head
+
+      - name: Start the API
+        run: |
+          IMPACTO_DATABASE_URL="sqlite:///$PWD/e2e.db" \
+          IMPACTO_COOKIE_SECURE=false \
+          IMPACTO_WEB_ORIGIN=http://127.0.0.1:3000 \
+          PYTHONPATH=src \
+            python -m uvicorn impacto.api:app --host 127.0.0.1 --port 8000 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/health && break; sleep 1; done
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - run: pnpm exec playwright install --with-deps chromium
+        working-directory: web
+      - run: API_ORIGIN=http://127.0.0.1:8000 pnpm build
+        working-directory: web
+        env:
+          SERWIST_SUPPRESS_TURBOPACK_WARNING: '1'
+      - run: pnpm start &
+        working-directory: web
+      - name: Wait for the web tier
+        run: for i in $(seq 1 30); do curl -sf http://127.0.0.1:3000/ && break; sleep 1; done
+
+      - name: E2E, offline and accessibility
+        run: E2E_BASE_URL=http://127.0.0.1:3000 pnpm exec playwright test
+        working-directory: web
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          # test-results/ carries the traces and screenshots; without it a
+          # failure here is only reproducible by guessing.
+          path: |
+            web/playwright-report/
+            web/test-results/
+          retention-days: 7

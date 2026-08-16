@@ -1,0 +1,65 @@
+# Local stack: Postgres 16, Redis 7, and the API.
+#
+# The API waits for both dependencies to report healthy before it starts, so a
+# cold `docker compose up` cannot race the database and crash on the first
+# migration.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-impacto}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-impacto}
+      POSTGRES_DB: ${POSTGRES_DB:-impacto}
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-impacto} -d ${POSTGRES_DB:-impacto}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    # Response cache and rate-limit counters only. Everything here is
+    # reconstructible, so persistence is deliberately off.
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory-policy", "allkeys-lru"]
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  api:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports: ["8000:8000"]
+    environment:
+      IMPACTO_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-impacto}:${POSTGRES_PASSWORD:-impacto}@postgres:5432/${POSTGRES_DB:-impacto}
+      IMPACTO_REDIS_URL: redis://redis:6379/0
+      IMPACTO_MARKET_PROVIDER: ${IMPACTO_MARKET_PROVIDER:-fixture}
+      IMPACTO_LLM_PROVIDER: ${IMPACTO_LLM_PROVIDER:-none}
+      IMPACTO_ANTHROPIC_API_KEY: ${IMPACTO_ANTHROPIC_API_KEY:-}
+      IMPACTO_GEMINI_API_KEY: ${IMPACTO_GEMINI_API_KEY:-}
+      IMPACTO_FRED_API_KEY: ${IMPACTO_FRED_API_KEY:-}
+      IMPACTO_HOLDINGS_ENCRYPTION_KEY: ${IMPACTO_HOLDINGS_ENCRYPTION_KEY:-}
+      # Single instance owns the jobs; a second replica must leave this false or
+      # every user gets notified twice.
+      IMPACTO_SCHEDULER_ENABLED: ${IMPACTO_SCHEDULER_ENABLED:-true}
+      IMPACTO_COMPLIANCE_MODE: "true"
+    # No command override: the image's entrypoint already runs the migrations
+    # before starting uvicorn, so compose and a real host behave identically.
+    # Overriding it here is how the two drifted apart in the first place.
+    restart: unless-stopped
+
+volumes:
+  pgdata:

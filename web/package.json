@@ -1,0 +1,42 @@
+{
+  "name": "impacto-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "gen:types": "openapi-typescript http://localhost:8000/openapi.json -o types/api.d.ts"
+  },
+  "dependencies": {
+    "@serwist/next": "9.5.12",
+    "dexie": "4.4.5",
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "1.62.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.4",
+    "@types/node": "22.19.4",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "jsdom": "30.0.1",
+    "openapi-typescript": "7.13.0",
+    "serwist": "9.5.12",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "packageManager": "pnpm@11.21.0"
+}
