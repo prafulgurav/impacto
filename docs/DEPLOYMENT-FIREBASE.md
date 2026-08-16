@@ -109,11 +109,30 @@ Takes about a minute. Expect `Operation ... finished successfully.`
 ```bash
 gcloud sql instances create impacto-db \
   --database-version=POSTGRES_16 \
-  --tier=db-f1-micro \
+  --edition=ENTERPRISE \
+  --tier=db-g1-small \
   --region=$REGION \
   --storage-size=10GB \
   --storage-auto-increase
 ```
+
+`--edition=ENTERPRISE` is not optional. Cloud SQL now defaults new instances to
+**Enterprise Plus**, which only accepts its own `db-perf-optimized-N-*` tiers and
+rejects everything else with *"invalid request for Enterprise Plus edition, use
+a predefined tier like db-perf-optimized-N instead"*. Enterprise Plus starts at
+a much larger machine than this workload needs.
+
+Tier options, all Enterprise edition:
+
+| Tier | Memory | Notes |
+|---|---|---|
+| `db-f1-micro` | 0.6 GB | Cheapest. Shared core, **no SLA**. Fine for a pilot. |
+| `db-g1-small` | 1.7 GB | Shared core, no SLA. The sensible starting point. |
+| `db-custom-1-3840` | 3.75 GB | Smallest dedicated vCPU, SLA-covered. Move here for production. |
+
+The database is not where this app works hardest — the event study runs in the
+API tier and the nightly precompute writes 275 rows — so a shared-core instance
+is a reasonable place to start, and resizing later is a restart, not a migration.
 
 **This takes 5–10 minutes.** Then:
 
