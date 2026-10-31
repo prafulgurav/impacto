@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.LocalCallStyle" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/answer_green</item>
+    </style>
+
+    <!-- Lock-screen / full-screen call UI: no action bar, dark, edge to edge. -->
+    <style name="Theme.LocalCallStyle.Fullscreen" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/call_bg</item>
+        <item name="android:statusBarColor">@color/call_bg</item>
+        <item name="android:navigationBarColor">@color/call_bg</item>
+        <item name="android:windowShowWallpaper">false</item>
+        <item name="android:windowTranslucentStatus" tools:targetApi="19">false</item>
+    </style>
+
+</resources>

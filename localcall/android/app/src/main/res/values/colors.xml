@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="call_bg">#FF101418</color>
+    <color name="call_surface">#FF1B2026</color>
+    <color name="call_text_primary">#FFF2F5F7</color>
+    <color name="call_text_secondary">#FFA8B2BD</color>
+    <color name="answer_green">#FF2E7D32</color>
+    <color name="decline_red">#FFC62828</color>
+</resources>
