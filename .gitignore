@@ -1,19 +1,24 @@
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.env
-*.egg-info/
-build/
-dist/
-.pytest_cache/
-.ruff_cache/
-.coverage
-htmlcov/
-data/cache/
-.DS_Store
-.idea/
-.vscode/
+# Android
+android/.gradle/
+android/local.properties
+android/build/
+android/app/build/
+android/.idea/
+android/*.iml
+android/gradle/wrapper/gradle-wrapper.jar
+*.apk
+*.aab
 
-# Local database files
-data/*.db
+# iOS — the project is generated from project.yml by XcodeGen
+ios/*.xcodeproj/
+ios/*.xcworkspace/
+ios/build/
+ios/DerivedData/
+
+# Ringtones are per-user assets, not source
+android/app/src/main/res/raw/ringtone.*
+ios/Resources/ringtone.caf
+ios/Resources/ringtone.aiff
+ios/Resources/ringtone.wav
+
+.DS_Store
