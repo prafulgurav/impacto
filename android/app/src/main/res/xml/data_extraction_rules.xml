@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- The only state we keep is the next scheduled ring, which is device-local. -->
+        <exclude domain="sharedpref" path="localcallstyle.prefs.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="localcallstyle.prefs.xml" />
+    </device-transfer>
+</data-extraction-rules>

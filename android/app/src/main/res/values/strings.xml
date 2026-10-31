@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Local Call Style</string>
+
+    <string name="caller_name">Alex Morgan</string>
+    <string name="caller_subtitle">Mobile · +91 98765 43210</string>
+
+    <string name="notif_channel_name">Incoming calls</string>
+    <string name="notif_channel_desc">Alarm-style incoming call alerts generated locally on this device.</string>
+
+    <string name="action_answer">Answer</string>
+    <string name="action_decline">Decline</string>
+
+    <string name="btn_trigger_now">Ring now</string>
+    <string name="btn_schedule">Ring in 10 seconds</string>
+    <string name="btn_cancel_scheduled">Cancel scheduled ring</string>
+    <string name="btn_stop">Stop ringing</string>
+    <string name="btn_permissions">Check permissions</string>
+
+    <string name="status_idle">Idle.</string>
+    <string name="status_scheduled">Scheduled to ring at %1$s.</string>
+    <string name="status_cancelled">Scheduled ring cancelled.</string>
+    <string name="status_answered">Call answered.</string>
+    <string name="status_declined">Call declined.</string>
+
+    <string name="perm_notifications_rationale">Notifications are required to show the incoming call.</string>
+    <string name="perm_fsi_missing">Full-screen notifications are off, so the call screen will not take over the lock screen. Tap to enable.</string>
+    <string name="perm_exact_alarm_missing">Exact alarms are off, so the scheduled ring may be delayed. Tap to enable.</string>
+    <string name="perm_all_granted">All permissions granted.</string>
+
+    <string name="ringtone_missing">No ringtone.mp3 in res/raw — falling back to the system ringtone.</string>
+</resources>
