@@ -111,6 +111,12 @@ def test_refresh_tokens_rotate_so_a_stolen_cookie_dies(client):
     assert client.post("/auth/refresh").status_code == 200
 
     # The attacker replays the cookie they captured before the legitimate refresh.
+    # The jar has to be emptied first. httpx keys cookies by (domain, path), and the
+    # server-issued cookie carries domain="testserver" while cookies.set() defaults to
+    # domain="". So set() ADDS a second impacto_refresh rather than replacing the rotated
+    # one, both go out in the Cookie header, and the request succeeds on the valid one --
+    # the replay never actually happens and the assertion tests nothing.
+    client.cookies.clear()
     client.cookies.set("impacto_refresh", stolen)
     assert client.post("/auth/refresh").status_code == 401
 
